@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          # Add commands to install any dependencies your project needs
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+      - name: Deploy to EC2
+        run: |
+          # Add commands to deploy your code to the EC2 instance
+          # Example using SCP:
+          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no -r ${{ github.workspace }} ec2-user@${{ secrets.EC2_HOST }}:~/${{ github.workspace }}
+          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "cd ${{ github.workspace }} && python3 cronjob.py"
