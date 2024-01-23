@@ -2,8 +2,8 @@ import re
 import asyncio
 import traceback
 from typing import Any
-from utility import format_price, relative_time_to_timestamp
 from playwright.async_api import async_playwright, Playwright, Page, Response, TimeoutError, BrowserContext
+from utility import format_price, relative_time_to_timestamp
 from init_db import init_db, insert_popularity_trends, insert_area_trends, insert_queries_data, insert_property_data
 
 with open("errors.logs.txt", mode="a") as errorFile:
