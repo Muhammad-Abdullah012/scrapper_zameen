@@ -23,9 +23,11 @@ jobs:
           # Add commands to install any dependencies your project needs
           python -m pip install --upgrade pip
           pip install --no-cache-dir -r requirements.txt
+      - name: Create EC2 private key file
+        run: echo "$EC2_PRIVATE_KEY" > ec2_private_key.pem
+        shell: bash
       - name: Deploy to EC2
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
-          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no -r ${{ github.workspace }} ec2-user@${{ secrets.EC2_HOST }}:~/${{ github.workspace }}
-          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "cd ${{ github.workspace }} && python3 cronjob.py"
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "cd ${{ github.workspace }} && python3 cronjob.py"
