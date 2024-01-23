@@ -24,10 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir -r requirements.txt
       - name: Create EC2 private key file
+        shell: bash
+        env:
+          EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
           echo "$EC2_PRIVATE_KEY" > ec2_private_key.pem
           chmod 400 "ec2_private_key.pem"
-        shell: bash
       - name: Deploy to EC2
         run: |
           # Add commands to deploy your code to the EC2 instance
