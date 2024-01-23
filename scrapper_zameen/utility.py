@@ -13,7 +13,7 @@ def format_price(price: str):
     price is expected to be in format: PKR 1.8 Crore
     """
     parts = price.split(" ")
-    print("parts ***==> ", parts, file=open("price_parts.txt", "a"))
+    print("parts ***==> ", parts)
     if len(parts) != 2:
         return ""
     match = re.search(r'\d+(\.\d+)?', parts[0])
