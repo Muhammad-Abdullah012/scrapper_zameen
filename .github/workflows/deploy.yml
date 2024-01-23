@@ -41,4 +41,4 @@ jobs:
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no -r $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && rm ec2_private_key.pem && pip install --no-cache-dir -r requirements.txt && sudo docker compose up -d && python3 cronjob.py"
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker compose up -d && python3 cronjob.py"
