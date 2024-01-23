@@ -38,4 +38,4 @@ jobs:
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
-          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "python3 ./cronjob.py"
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "ls -R"
