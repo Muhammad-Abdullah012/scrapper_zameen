@@ -38,5 +38,5 @@ jobs:
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
-          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no -r . ec2-user@${{ secrets.EC2_HOST }}:~/$(basename ${{ github.repository }})
+          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no -r ./ ec2-user@${{ secrets.EC2_HOST }}:~/$(basename ${{ github.repository }})
           ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "ls -R"
