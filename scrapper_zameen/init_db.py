@@ -25,17 +25,17 @@ def insert_popularity_trends(trends: dict):
                 if not isinstance(t, dict):
                     continue
                 id = t["id"]
-                location_id = t["location_id"]
-                month_year = t["month_year"]
-                stats_date = t["stats_date"]
-                view_count = t["view_count"]
-                search_percentage = t["search_percentage"]
-                print("id: ", id)
-                print("location_id: ", location_id)
-                print("month_year: ", month_year)
-                print("stats_date: ", stats_date)
-                print("view_count: ", view_count)
-                print("search_percentage: ", search_percentage)
+                # location_id = t["location_id"]
+                # month_year = t["month_year"]
+                # stats_date = t["stats_date"]
+                # view_count = t["view_count"]
+                # search_percentage = t["search_percentage"]
+                # print("id: ", id)
+                # print("location_id: ", location_id)
+                # print("month_year: ", month_year)
+                # print("stats_date: ", stats_date)
+                # print("view_count: ", view_count)
+                # print("search_percentage: ", search_percentage)
                 get_by_id = Trend.get_or_none(id=id)
 
                 if get_by_id is None:
@@ -61,33 +61,33 @@ def insert_popularity_trends(trends: dict):
                     id = popularity_trend["id"]
                     parents = popularity_trend["parents"]
                     trends2 = popularity_trend["trends"]
-                    title = popularity_trend["title"]
-                    title_l1 = popularity_trend["title_l1"]
-                    longitude = popularity_trend["longitude"]
-                    latitude = popularity_trend["latitude"]
-                    level = popularity_trend["level"]
-                    is_popular = popularity_trend["is_popular"]
-                    parent_id = popularity_trend["parent_id"]
-                    position = popularity_trend["position"]
-                    prev_position = popularity_trend["prev_position"]
-                    search_percentage = popularity_trend["search_percentage"]
-                    prev_search_percentage = popularity_trend["prev_search_percentage"]
-                    view_count = popularity_trend["view_count"]
-                    print("id:", id)
-                    print("parents:", parents)
-                    print("trends:", trends)
-                    print("title:", title)
-                    print("title_l1:", title_l1)
-                    print("longitude:", longitude)
-                    print("latitude:", latitude)
-                    print("level:", level)
-                    print("is_popular:", is_popular)
-                    print("parent_id:", parent_id)
-                    print("position:", position)
-                    print("prev_position:", prev_position)
-                    print("search_percentage:", search_percentage)
-                    print("prev_search_percentage:", prev_search_percentage)
-                    print("view_count:", view_count)
+                    # title = popularity_trend["title"]
+                    # title_l1 = popularity_trend["title_l1"]
+                    # longitude = popularity_trend["longitude"]
+                    # latitude = popularity_trend["latitude"]
+                    # level = popularity_trend["level"]
+                    # is_popular = popularity_trend["is_popular"]
+                    # parent_id = popularity_trend["parent_id"]
+                    # position = popularity_trend["position"]
+                    # prev_position = popularity_trend["prev_position"]
+                    # search_percentage = popularity_trend["search_percentage"]
+                    # prev_search_percentage = popularity_trend["prev_search_percentage"]
+                    # view_count = popularity_trend["view_count"]
+                    # print("id:", id)
+                    # print("parents:", parents)
+                    # print("trends:", trends)
+                    # print("title:", title)
+                    # print("title_l1:", title_l1)
+                    # print("longitude:", longitude)
+                    # print("latitude:", latitude)
+                    # print("level:", level)
+                    # print("is_popular:", is_popular)
+                    # print("parent_id:", parent_id)
+                    # print("position:", position)
+                    # print("prev_position:", prev_position)
+                    # print("search_percentage:", search_percentage)
+                    # print("prev_search_percentage:", prev_search_percentage)
+                    # print("view_count:", view_count)
                     print("_________----------------------_____________")
                     del popularity_trend["parents"]
                     del popularity_trend["trends"]
@@ -101,13 +101,13 @@ def insert_popularity_trends(trends: dict):
                         if not isinstance(p, dict):
                             continue
                         id = p["id"]
-                        level = p["level"]
-                        name = p["name"]
-                        name_l1 = p["name_l1"]
-                        print("id: ", id)
-                        print("level: ", level)
-                        print("name: ", name)
-                        print("name_l1: ", name_l1)
+                        # level = p["level"]
+                        # name = p["name"]
+                        # name_l1 = p["name_l1"]
+                        # print("id: ", id)
+                        # print("level: ", level)
+                        # print("name: ", name)
+                        # print("name_l1: ", name_l1)
                         get_by_id = Parent_Location.get_or_none(id=id)
                         if get_by_id is None:
                             Parent_Location.create(**p)
@@ -116,17 +116,17 @@ def insert_popularity_trends(trends: dict):
                         if not isinstance(t, dict):
                             continue
                         id = t["id"]
-                        location_id = t["location_id"]
-                        month_year = t["month_year"]
-                        stats_date = t["stats_date"]
-                        view_count = t["view_count"]
-                        search_percentage = t["search_percentage"]
-                        print("id: ", id)
-                        print("location_id: ", location_id)
-                        print("month_year: ", month_year)
-                        print("stats_date: ", stats_date)
-                        print("view_count: ", view_count)
-                        print("search_percentage: ", search_percentage)
+                        # location_id = t["location_id"]
+                        # month_year = t["month_year"]
+                        # stats_date = t["stats_date"]
+                        # view_count = t["view_count"]
+                        # search_percentage = t["search_percentage"]
+                        # print("id: ", id)
+                        # print("location_id: ", location_id)
+                        # print("month_year: ", month_year)
+                        # print("stats_date: ", stats_date)
+                        # print("view_count: ", view_count)
+                        # print("search_percentage: ", search_percentage)
                         get_by_id = Trend.get_or_none(id=id)
 
                         if get_by_id is None:
@@ -170,7 +170,7 @@ def insert_area_trends(area_trends: dict):
         id = index["id"]
         print("*************************************")
         for key, value in index.items():
-            if not isinstance(value, list) and not isinstance(value, dict) and value != None:
+            if not isinstance(value, list) and not isinstance(value, dict) and value is not None:
                 key_value_obj[key] = value
 
         print("INSERTING VALUES IN property TABLE ==> ", key_value_obj)

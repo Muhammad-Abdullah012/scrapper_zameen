@@ -1,13 +1,13 @@
 import subprocess
-import schedule
 import time
+import schedule
 
-script_path = './scrape.py'
+SCRIPT_PATH = './scrape.py'
 
 
 def job():
     try:
-        subprocess.run(['python3', script_path], check=True)
+        subprocess.run(['python3', SCRIPT_PATH], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error running the script: {e}")
 
