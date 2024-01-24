@@ -42,5 +42,5 @@ jobs:
             cd $REPO_NAME
             pip install --no-cache-dir -r requirements.txt
             sudo docker-compose up -d
-            python3 cronjob.py
+            nohup python3 cronjob.py > output.log &
             # ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker-compose up -d && python3 cronjob.py"
