@@ -66,7 +66,8 @@ with open("errors.logs.txt", mode="a") as errorFile:
                         insert_queries_data(hits)
                     except Exception as e:
                         print(
-                            f"handle_response::inserting_queries::Error: {e}", file=errorFile)
+                            f"handle_response::inserting_queries::Error: {e}",
+                            file=errorFile)
                         continue
 
         except Exception as e:
@@ -163,7 +164,7 @@ with open("errors.logs.txt", mode="a") as errorFile:
                             break
                         dot = next_url.rfind(".")
                         hyphen = next_url.rfind("-")
-                        page_no = next_url[hyphen+1:dot]
+                        page_no = next_url[hyphen + 1:dot]
                         # ONLY 1st 2 Pages!
                         # if int(page_no) >= 1:
                         #     break
@@ -204,7 +205,8 @@ with open("errors.logs.txt", mode="a") as errorFile:
                     await page_loaded(page)
                 except TimeoutError:
                     print(
-                        f"crawl_website::Timeout error while getting attribute {locator}", file=errorFile)
+                        f"crawl_website::Timeout error while getting attribute {locator}",
+                        file=errorFile)
                     continue
                 except Exception as e:
                     print(f"crawl_website::Error: {e}",

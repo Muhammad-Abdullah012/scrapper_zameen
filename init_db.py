@@ -8,9 +8,19 @@ from models import db, Location, Property_Trend, Property_Trend_Change_Percentag
 
 def init_db():
     db.connect(reuse_if_open=True)
-    tables_to_create = [Trend, Location, Parent_Location, Property_Trend, Property_Trend_Index,
-                        Purpose, Type, Parent_Location_With_ExternalID, Property, Property_V2,
-                        Property_Trend_Change_Percentage_By_Price, Property_Trend_Change_Percentage_By_Price_Per_Sqft]
+    tables_to_create = [
+        Trend,
+        Location,
+        Parent_Location,
+        Property_Trend,
+        Property_Trend_Index,
+        Purpose,
+        Type,
+        Parent_Location_With_ExternalID,
+        Property,
+        Property_V2,
+        Property_Trend_Change_Percentage_By_Price,
+        Property_Trend_Change_Percentage_By_Price_Per_Sqft]
 
     db.create_tables(tables_to_create)
 
@@ -96,7 +106,12 @@ def insert_popularity_trends(trends: dict):
                     if get_by_id is None:
                         Location.create(**popularity_trend)
                     # Location.create(id=id, title=title, title_l1=title_l1, longitude=longitude,
-                    #                 latitude=latitude, level=level, is_popular=is_popular, parent_id=parent_id, position=position, prev_position=prev_position, search_percentage=search_percentage, prev_search_percentage=prev_search_percentage, view_count=view_count)
+                    # latitude=latitude, level=level, is_popular=is_popular,
+                    # parent_id=parent_id, position=position,
+                    # prev_position=prev_position,
+                    # search_percentage=search_percentage,
+                    # prev_search_percentage=prev_search_percentage,
+                    # view_count=view_count)
                     for p in parents:
                         if not isinstance(p, dict):
                             continue
@@ -170,7 +185,9 @@ def insert_area_trends(area_trends: dict):
         id = index["id"]
         print("*************************************")
         for key, value in index.items():
-            if not isinstance(value, list) and not isinstance(value, dict) and value is not None:
+            if not isinstance(
+                    value, list) and not isinstance(
+                    value, dict) and value is not None:
                 key_value_obj[key] = value
 
         print("INSERTING VALUES IN property TABLE ==> ", key_value_obj)
@@ -296,8 +313,13 @@ def insert_queries_data(data: List[dict]):
                             location_id=location[-1]["id"]
                         ).where(Property.id == item.get("id")).execute()
                     else:
-                        print(item["price"], " <= price is same => ",
-                              get_by_id["price"], file=open("price_init_db.txt", "a"))
+                        print(
+                            item["price"],
+                            " <= price is same => ",
+                            get_by_id["price"],
+                            file=open(
+                                "price_init_db.txt",
+                                "a"))
                 except DoesNotExist:
                     Property.create(id=item["id"],
                                     state=item["state"],
