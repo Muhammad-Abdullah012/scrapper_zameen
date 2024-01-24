@@ -21,11 +21,26 @@ jobs:
         run: |
           echo "$EC2_PRIVATE_KEY" > ec2_private_key.pem
           chmod 400 "ec2_private_key.pem"
-      - name: Deploy to EC2
+      - name: Copy Files to EC2
         env:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no -r $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker-compose up -d && python3 cronjob.py"
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key_path: ec2_private_key.pem
+          envs: REPO_NAME
+          script: |
+            pip install --upgrade pip
+            cd $REPO_NAME
+            pip install --no-cache-dir -r requirements.txt
+            sudo docker-compose up -d
+            python3 cronjob.py
+            # ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker-compose up -d && python3 cronjob.py"
