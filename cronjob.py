@@ -12,7 +12,9 @@ def job():
         print(f"Error running the script: {e}")
 
 
+print("!!!!!!!!Scheduling job!!!!!!")
 schedule.every().day.at("05:30", "UTC").do(job)
+print("!!!!!!!!Scheduled!!!!!!")
 
 
 while True:
