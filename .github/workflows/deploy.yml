@@ -14,15 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: |
-          # Add commands to install any dependencies your project needs
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir -r requirements.txt
       - name: Create EC2 private key file
         shell: bash
         env:
@@ -30,10 +21,6 @@ jobs:
         run: |
           echo "$EC2_PRIVATE_KEY" > ec2_private_key.pem
           chmod 400 "ec2_private_key.pem"
-
-      - name: Print directory structure
-        run: ls -R
-
       - name: Deploy to EC2
         env:
           REPO_NAME: ${{ github.event.repository.name }}
@@ -41,4 +28,4 @@ jobs:
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no -r $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker compose up -d && python3 cronjob.py"
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker-compose up -d && python3 cronjob.py"
