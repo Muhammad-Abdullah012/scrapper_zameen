@@ -41,11 +41,7 @@ jobs:
             pip install --upgrade pip
             echo "Repo name => $REPO_NAME"
             cd $REPO_NAME
-            pip install --no-cache-dir -r requirements.txt
-            pip install playwright
-            playwright install
-            playwright install-deps
-            sudo docker-compose up -d
+            sudo docker-compose up -d --build
             nohup python3 cronjob.py > nohup.out 2> nohup.err < /dev/null &
             echo "Done"
             # ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "pip install --upgrade pip && cd $REPO_NAME && pip install --no-cache-dir -r requirements.txt && sudo docker-compose up -d && python3 cronjob.py"
