@@ -35,7 +35,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
-          key_path: ec2_private_key.pem
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           envs: REPO_NAME
           script: |
             pip install --upgrade pip
