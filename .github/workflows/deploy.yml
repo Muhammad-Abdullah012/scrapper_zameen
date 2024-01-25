@@ -33,9 +33,9 @@ jobs:
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
-          scp -i ec2_private_key.pem $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          scp -i ec2_private_key.pem $(pwd)/dockerfile ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          scp -i ec2_private_key.pem $(pwd)/.env ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
+          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
+          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/dockerfile ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
+          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/.env ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
