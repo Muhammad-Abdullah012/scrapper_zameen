@@ -2,15 +2,21 @@ import re
 import asyncio
 import traceback
 from typing import Any
-from playwright.async_api import async_playwright, Playwright, Page, Response, TimeoutError, BrowserContext
+from playwright.async_api import (
+    async_playwright,
+    Playwright,
+    Page,
+    Response,
+    TimeoutError as PlaywrightTimeout,
+    BrowserContext)
 from utility import format_price, relative_time_to_timestamp
-from init_db import init_db, insert_popularity_trends, insert_area_trends, insert_queries_data, insert_property_data
+from init_db import (
+    insert_popularity_trends,
+    insert_area_trends,
+    insert_queries_data,
+    insert_property_data)
 
-with open("errors.logs.txt", mode="a") as errorFile:
-    try:
-        init_db()
-    except Exception as e:
-        print(f"init_db::Error: {e}", file=errorFile)
+with open("errors.logs.txt", mode="a", encoding="utf-8") as errorFile:
 
     async def search_city(city: str, page: Page, timeout=60000):
         max_retries = 4
@@ -29,7 +35,7 @@ with open("errors.logs.txt", mode="a") as errorFile:
                     has_text=re.compile("^find$", re.IGNORECASE))
                 await find_button.click(timeout=timeout)
                 break
-            except TimeoutError:
+            except PlaywrightTimeout:
                 await asyncio.sleep(30)
                 retries += 1
             except Exception as e:
@@ -50,13 +56,13 @@ with open("errors.logs.txt", mode="a") as errorFile:
             print("json_data ===>>>", json_data)
             if "areaTrends" in response.url:
                 insert_area_trends(json_data)
-                pass
+
             if "popularityTrends" in response.url:
                 # Popularity Trends
                 insert_popularity_trends(json_data)
 
             if "queries" in response.url:
-                pass
+
                 for results in json_data["results"]:
                     try:
                         hits = results["hits"]
@@ -125,7 +131,7 @@ with open("errors.logs.txt", mode="a") as errorFile:
                         print("ul ==> ", ul)
                 break
 
-            except TimeoutError:
+            except PlaywrightTimeout:
                 await asyncio.sleep(30)
                 retries += 1
             except Exception as e:
@@ -176,7 +182,7 @@ with open("errors.logs.txt", mode="a") as errorFile:
                 print("end of loop!!", )
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 break
-            except TimeoutError:
+            except PlaywrightTimeout:
                 await asyncio.sleep(30)
                 retries += 1
             except Exception as e:
@@ -203,7 +209,7 @@ with open("errors.logs.txt", mode="a") as errorFile:
                         continue
                     await page.goto(url + href)
                     await page_loaded(page)
-                except TimeoutError:
+                except PlaywrightTimeout:
                     print(
                         f"crawl_website::Timeout error while getting attribute {locator}",
                         file=errorFile)

@@ -1,7 +1,17 @@
 import os
 import dotenv
 from playhouse.postgres_ext import PostgresqlExtDatabase, ArrayField
-from peewee import Model, AutoField, IntegerField, DoubleField, ForeignKeyField, TimestampField, CharField, DateField, BooleanField, TextField
+from peewee import (
+    Model,
+    AutoField,
+    IntegerField,
+    DoubleField,
+    ForeignKeyField,
+    TimestampField,
+    CharField,
+    DateField,
+    BooleanField,
+    TextField)
 
 dotenv.load_dotenv()
 db = PostgresqlExtDatabase(
