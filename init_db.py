@@ -3,7 +3,20 @@ import traceback
 from typing import List, Any
 from dateutil.parser import isoparse
 from peewee import DoesNotExist
-from models import db, Location, Property_Trend, Property_Trend_Change_Percentage_By_Price, Property_Trend_Change_Percentage_By_Price_Per_Sqft, Parent_Location, Trend, Property_Trend_Index, Purpose, Type, Parent_Location_With_ExternalID, Property, Property_V2
+from models import (
+    db,
+    Location,
+    Property_Trend,
+    Property_Trend_Change_Percentage_By_Price,
+    Property_Trend_Change_Percentage_By_Price_Per_Sqft,
+    Parent_Location,
+    Trend,
+    Property_Trend_Index,
+    Purpose,
+    Type,
+    Parent_Location_With_ExternalID,
+    Property,
+    Property_V2)
 
 
 def init_db():
