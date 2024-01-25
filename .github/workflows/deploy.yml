@@ -45,6 +45,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           envs: REPO_NAME
+          command_timeout: 20m
           script: |
             pip install --upgrade pip
             echo "Repo name => $REPO_NAME"
