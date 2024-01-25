@@ -11,12 +11,17 @@ from playwright.async_api import (
     BrowserContext)
 from utility import format_price, relative_time_to_timestamp
 from init_db import (
+    init_db,
     insert_popularity_trends,
     insert_area_trends,
     insert_queries_data,
     insert_property_data)
 
 with open("errors.logs.txt", mode="a", encoding="utf-8") as errorFile:
+    try:
+        init_db()
+    except Exception as e:
+        print(f"init_db::Error: {e}", file=errorFile)
 
     async def search_city(city: str, page: Page, timeout=60000):
         max_retries = 4
