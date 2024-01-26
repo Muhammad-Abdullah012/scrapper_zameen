@@ -33,6 +33,8 @@ jobs:
         run: |
           # Add commands to deploy your code to the EC2 instance
           # Example using SCP:
+          scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/scripts/create_directory.sh ec2-user@${{ secrets.EC2_HOST }}:~
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "chmod +x create_directory.sh && ./create_directory.sh $REPO_NAME"
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/*.{py,yml,txt} ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/dockerfile ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/.env ec2-user@${{ secrets.EC2_HOST }}:~/$REPO_NAME
