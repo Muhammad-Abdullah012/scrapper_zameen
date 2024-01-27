@@ -1,5 +1,6 @@
 
 import traceback
+import sys
 from typing import List, Any
 from dateutil.parser import isoparse
 from peewee import DoesNotExist
@@ -62,11 +63,10 @@ def insert_popularity_trends(trends: dict):
                 get_by_id = Trend.get_or_none(id=id)
 
                 if get_by_id is None:
-                    print("get_by_id is None", file=open("db_data.txt", "a"))
+                    print("get_by_id is None")
                     Trend.create(**t)
                 else:
-                    print("get_by_id is Not None, updating record",
-                          file=open("db_data.txt", "a"))
+                    print("get_by_id is Not None, updating record")
                     Trend.update(**t).where(Trend.id == id).execute()
                 # Trend.get_or_create(**t)
             return
@@ -158,28 +158,22 @@ def insert_popularity_trends(trends: dict):
                         get_by_id = Trend.get_or_none(id=id)
 
                         if get_by_id is None:
-                            print("get_by_id is None",
-                                  file=open("db_data.txt", "a"))
+                            print("get_by_id is None")
                             Trend.create(**t)
-                            print("Created!!",
-                                  file=open("db_data.txt", "a"))
+                            print("Created!!")
                         else:
-                            print("get_by_id is Not None, updating record",
-                                  file=open("db_data.txt", "a"))
+                            print("get_by_id is Not None, updating record")
                             Trend.update(**t).where(Trend.id == id).execute()
-                            print("Updated!!",
-                                  file=open("db_data.txt", "a"))
+                            print("Updated!!")
 
             except Exception as e:
-                print(f"insert_popularity_trends::for::Error: {e}", file=open(
-                    "errors.logs.txt", "a"))
+                print(f"insert_popularity_trends::for::Error: {e}", file=sys.stderr)
                 print(f"trends ==> {trends}")
                 traceback.print_exc()
                 continue
 
     except Exception as e:
-        print(f"insert_popularity_trends:::Error: {e}", file=open(
-            "errors.logs.txt", "a"))
+        print(f"insert_popularity_trends:::Error: {e}", file=sys.stderr)
         traceback.print_exc()
 
     finally:
@@ -271,8 +265,7 @@ def insert_area_trends(area_trends: dict):
                         #     **v)
 
     except Exception as e:
-        print(f"insert_area_trends:::Error: {e}", file=open(
-            "errors.logs.txt", "a"))
+        print(f"insert_area_trends:::Error: {e}", file=sys.stderr)
         traceback.print_exc()
     finally:
         db.close()
@@ -329,10 +322,7 @@ def insert_queries_data(data: List[dict]):
                         print(
                             item["price"],
                             " <= price is same => ",
-                            get_by_id["price"],
-                            file=open(
-                                "price_init_db.txt",
-                                "a"))
+                            get_by_id["price"])
                 except DoesNotExist:
                     Property.create(id=item["id"],
                                     state=item["state"],
@@ -424,14 +414,12 @@ def insert_queries_data(data: List[dict]):
                 #                        location_id=location[-1]["id"]
                 #                        )
             except Exception as e:
-                print(f"insert_queries_data::for::Error: {e}", file=open(
-                    "errors.logs.txt", "a"))
+                print(f"insert_queries_data::for::Error: {e}", file=sys.stderr)
                 traceback.print_exc()
                 continue
 
     except Exception as e:
-        print(f"insert_queries_data::Error: {e}", file=open(
-            "errors.logs.txt", "a"))
+        print(f"insert_queries_data::Error: {e}", file=sys.stderr)
         traceback.print_exc()
     finally:
         db.close()
@@ -443,8 +431,7 @@ def insert_property_data(data: dict[str, Any]):
         db.connect(reuse_if_open=True)
         Property_V2.get_or_create(**data)
     except Exception as e:
-        print(f"insert_property_data::Error: {e}", file=open(
-            "errors.logs.txt", "a"))
+        print(f"insert_property_data::Error: {e}", file=sys.stderr)
         traceback.print_exc()
     finally:
         db.close()
