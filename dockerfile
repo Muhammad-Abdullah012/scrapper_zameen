@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.8
 
 WORKDIR /app
 
@@ -12,5 +12,6 @@ RUN pip install playwright
 RUN playwright install
 RUN playwright install-deps
 
+RUN chmod +x cronjob.py
 
-CMD ["python3", "cronjob.py"]
+CMD ["python3", "./cronjob.py"]

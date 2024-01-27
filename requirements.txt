@@ -4,3 +4,4 @@ peewee==3.17.0
 python-dotenv==1.0.0
 pytz==2022.1
 psycopg2-binary==2.9.9
+ischedule==1.2.6
