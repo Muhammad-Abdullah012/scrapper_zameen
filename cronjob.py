@@ -1,9 +1,8 @@
 import subprocess
 import os
 import sys
+from time import sleep
 import schedule
-from ischedule import schedule as iSchedule, run_loop
-# import ischedule.ischedule as iSchedule
 from init_db import init_db
 
 try:
@@ -24,10 +23,11 @@ def job():
 
 
 print("!!!!!!!!Scheduling job!!!!!!")
-# job()
-schedule.every().day.at("08:00", "UTC").do(job)
+# schedule.every().minute.do(job)
+schedule.every().day.at("11:00", "UTC").do(job)
 print("!!!!!!!!Scheduled!!!!!!")
 
 
-iSchedule(schedule.run_pending, interval=0.1)
-run_loop()
+while True:
+    schedule.run_pending()
+    sleep(0.1)
