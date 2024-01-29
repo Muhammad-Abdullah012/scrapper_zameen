@@ -18,6 +18,7 @@ services:
       context: .
     restart: always
     container_name: scrapper_zameen_container
+    tty: true
     ports:
       - "8080:8080"
     env_file:
