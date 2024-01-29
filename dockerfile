@@ -12,6 +12,6 @@ RUN pip install playwright
 RUN playwright install
 RUN playwright install-deps
 
-RUN chmod +x cronjob.py
+RUN find . -type f -name "*.py" -exec chmod +x {} +
 
 CMD ["python3", "./cronjob.py"]

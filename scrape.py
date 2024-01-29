@@ -2,7 +2,7 @@ import re
 import sys
 import asyncio
 import traceback
-from typing import Any
+from typing import Any, List, Dict
 from playwright.async_api import (
     async_playwright,
     Playwright,
@@ -23,6 +23,7 @@ try:
     init_db()
 except Exception as e:
     print(f"init_db::Error: {e}", file=sys.stderr)
+
 
 async def search_city(city: str, page: Page, timeout=60000):
     max_retries = 4
@@ -46,12 +47,13 @@ async def search_city(city: str, page: Page, timeout=60000):
             retries += 1
         except Exception as e:
             print(f"search_city::Error: {e}",
-                    file=sys.stderr)
+                  file=sys.stderr)
             break
     if retries == max_retries:
         print(
             f"Maximum retries reached. search_city failed for city: {city}")
     print("!!!search_city finished!!!")
+
 
 async def handle_response(response: Response):
     if "queries" not in response.url and "areaTrends" not in response.url and "popularityTrends" not in response.url:
@@ -84,7 +86,8 @@ async def handle_response(response: Response):
 
     except Exception as e:
         print(f"handle_response::Error: {e}",
-                file=sys.stderr)
+              file=sys.stderr)
+
 
 async def get_page_html_data(base_url: str, current_page: Page, context: BrowserContext):
     max_retries = 4
@@ -114,7 +117,7 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
                     # if in_active_banner_count > 0:
                     #     print("in-active property found!")
                     #     continue
-                    key_value_obj: dict[str, Any] = {
+                    key_value_obj: Dict[str, Any] = {
                         "header": " ".join(h2) + "\n" + header, "desc": desc
                     }
                     for li in details:
@@ -149,6 +152,7 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
             f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}")
     print("!!get_page_html_data Finished!!")
 
+
 async def page_loaded(p: Page):
     print("page_Loaded called")
     context = p.context
@@ -169,10 +173,9 @@ async def page_loaded(p: Page):
                 await get_page_html_data(base_url=base_url, current_page=p, context=context)
                 if count > 0 and next_page is not None:
                     next_url = await next_page.get_attribute("href")
-                    print("next_url ==> ", file=open("next_url.txt", "a"))
+                    print("next_url ==> ")
                     if next_url is None:
-                        print("No next_url found!!",
-                                file=open("next_url.txt", "a"))
+                        print("No next_url found!!")
                         break
                     dot = next_url.rfind(".")
                     hyphen = next_url.rfind("-")
@@ -193,7 +196,7 @@ async def page_loaded(p: Page):
             retries += 1
         except Exception as e:
             print(f"page_loaded::Error: {e}",
-                    file=sys.stderr)
+                  file=sys.stderr)
             traceback.print_exc()
             break
 
@@ -203,7 +206,8 @@ async def page_loaded(p: Page):
     print("!!page_Loaded Finished!!")
 # Crawl website
 
-async def crawl_website(page: Page, url: str, links: list[str], depth: int):
+
+async def crawl_website(page: Page, url: str, links: List[str], depth: int):
     print(f"Visiting: {url}, currently at depth {depth}")
     await page.goto(url, timeout=60000)
     for link in links:
@@ -222,11 +226,12 @@ async def crawl_website(page: Page, url: str, links: list[str], depth: int):
                 continue
             except Exception as e:
                 print(f"crawl_website::Error: {e}",
-                        file=sys.stderr)
+                      file=sys.stderr)
                 continue
 
 # async def track_pages(page: Page):
 #     page.on("load", page_loaded)
+
 
 async def run(playwright: Playwright):
     chromium = playwright.chromium
@@ -259,6 +264,7 @@ async def run(playwright: Playwright):
 
     await context.close()
     await browser.close()
+
 
 async def main():
     async with async_playwright() as playwright:

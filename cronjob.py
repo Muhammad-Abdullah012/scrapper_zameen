@@ -24,7 +24,8 @@ def job():
 
 
 print("!!!!!!!!Scheduling job!!!!!!")
-schedule.every().day.at("11:00", "UTC").do(job)
+# job()
+schedule.every().day.at("08:00", "UTC").do(job)
 print("!!!!!!!!Scheduled!!!!!!")
 
 
