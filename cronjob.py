@@ -1,19 +1,19 @@
 import subprocess
+import os
 import sys
-import time
 import schedule
 from ischedule import schedule as iSchedule, run_loop
 # import ischedule.ischedule as iSchedule
+from init_db import init_db
 
-# from init_db import init_db
-
-# with open("errors.logs.txt", mode="a", encoding="utf-8") as errorFile:
 try:
     init_db()
 except Exception as e:
     print(f"init_db::Error: {e}", file=sys.stderr)
 
-SCRIPT_PATH = './scrape.py'
+SCRIPT_PATH = os.getcwd() + '/scrape.py'
+
+print("SCRIPT_PATH ==>> ", SCRIPT_PATH)
 
 
 def job():

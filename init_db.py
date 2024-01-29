@@ -1,7 +1,7 @@
 
 import traceback
 import sys
-from typing import List, Any
+from typing import List, Any, Dict
 from dateutil.parser import isoparse
 from peewee import DoesNotExist
 from models import (
@@ -167,7 +167,8 @@ def insert_popularity_trends(trends: dict):
                             print("Updated!!")
 
             except Exception as e:
-                print(f"insert_popularity_trends::for::Error: {e}", file=sys.stderr)
+                print(
+                    f"insert_popularity_trends::for::Error: {e}", file=sys.stderr)
                 print(f"trends ==> {trends}")
                 traceback.print_exc()
                 continue
@@ -425,7 +426,7 @@ def insert_queries_data(data: List[dict]):
         db.close()
 
 
-def insert_property_data(data: dict[str, Any]):
+def insert_property_data(data: Dict[str, Any]):
     print("insert_property_data::data==> ", data)
     try:
         db.connect(reuse_if_open=True)
