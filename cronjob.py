@@ -1,4 +1,5 @@
 import subprocess
+import threading
 import os
 import sys
 from time import sleep
@@ -22,9 +23,13 @@ def job():
         print(f"Error running the script: {e}")
 
 
+def threaded_job():
+    threading.Thread(target=job).start()
+
+
 print("!!!!!!!!Scheduling job!!!!!!")
 # schedule.every().minute.do(job)
-schedule.every().day.at("11:00", "UTC").do(job)
+schedule.every().day.at("14:00", "UTC").do(threaded_job)
 print("!!!!!!!!Scheduled!!!!!!")
 
 
