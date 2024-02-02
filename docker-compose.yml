@@ -17,6 +17,10 @@ services:
     build:
       context: .
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
     container_name: scrapper_zameen_container
     tty: true
     ports:
