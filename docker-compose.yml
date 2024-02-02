@@ -20,7 +20,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.8'
+          cpus: '1'
+          mem_limit: '0.7g'
+          memory: '0.7g'
     container_name: scrapper_zameen_container
     tty: true
     ports:
