@@ -3,6 +3,7 @@ import sys
 import asyncio
 import traceback
 from typing import Any, List, Dict
+import socket
 from playwright.async_api import (
     async_playwright,
     Playwright,
@@ -18,6 +19,21 @@ from init_db import (
     insert_queries_data,
     insert_property_data)
 
+REMOTE_SERVER = "one.one.one.one"
+
+
+def is_connected():
+    try:
+        host = socket.gethostbyname(REMOTE_SERVER)
+        s = socket.create_connection((host, 80), 2)
+        s.close()
+        return True
+    except Exception:
+        pass
+    return False
+
+
+print("System is connected to internet => ", is_connected())
 
 try:
     init_db()
@@ -48,6 +64,7 @@ async def search_city(city: str, page: Page, timeout=60000):
         except Exception as e:
             print(f"search_city::Error: {e}",
                   file=sys.stderr)
+            print("System is connected to internet => ", is_connected())
             break
     if retries == max_retries:
         print(
@@ -87,6 +104,7 @@ async def handle_response(response: Response):
     except Exception as e:
         print(f"handle_response::Error: {e}",
               file=sys.stderr)
+        print("System is connected to internet => ", is_connected())
 
 
 async def get_page_html_data(base_url: str, current_page: Page, context: BrowserContext):
@@ -145,6 +163,7 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
             retries += 1
         except Exception as e:
             print(f"get_page_html_data::Error: {e}", file=sys.stderr)
+            print("System is connected to internet => ", is_connected())
             traceback.print_exc()
             break
     if retries == max_retries:
@@ -197,6 +216,7 @@ async def page_loaded(p: Page):
         except Exception as e:
             print(f"page_loaded::Error: {e}",
                   file=sys.stderr)
+            print("System is connected to internet => ", is_connected())
             traceback.print_exc()
             break
 
@@ -223,10 +243,12 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
                 print(
                     f"crawl_website::Timeout error while getting attribute {locator}",
                     file=sys.stderr)
+                print("System is connected to internet => ", is_connected())
                 continue
             except Exception as e:
                 print(f"crawl_website::Error: {e}",
                       file=sys.stderr)
+                print("System is connected to internet => ", is_connected())
                 continue
 
 # async def track_pages(page: Page):
@@ -257,6 +279,7 @@ async def run(playwright: Playwright):
         await search_city(city=city, page=page)
         await page_loaded(page)
 
+    print("System is connected to internet => ", is_connected())
     tasks = [task_queue.get() for _ in range(task_queue.qsize())]
     print(f"Waiting for {len(tasks)} tasks!!")
     await asyncio.gather(*tasks)
@@ -272,5 +295,6 @@ async def main():
             await run(playwright)
         except Exception as e:
             print(f"main::Error: {e}", file=sys.stderr)
+            print("System is connected to internet => ", is_connected())
 
 asyncio.run(main())
