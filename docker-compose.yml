@@ -27,8 +27,10 @@ services:
       resources:
         limits:
           cpus: '1'
-          # mem_limit: ""
           memory: '0.7g'
+        reservations:
+          cpus: '0.5'
+          memory: '0.3g'
     container_name: scrapper_zameen_container
     tty: true
     ports:
