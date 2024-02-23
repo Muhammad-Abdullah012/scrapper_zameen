@@ -1,6 +1,7 @@
 import re
 import sys
 import asyncio
+from time import sleep
 import traceback
 from typing import Any, List, Dict
 import socket
@@ -33,12 +34,19 @@ def is_connected():
     return False
 
 
+def handle_error(function_name: str, error: Exception):
+    print(f"{function_name}::Error: {error}", file=sys.stderr)
+    print("System is connected to the internet => ", is_connected())
+    traceback.print_exc()
+    sleep(10)
+
+
 print("System is connected to internet => ", is_connected())
 
 try:
     init_db()
 except Exception as e:
-    print(f"init_db::Error: {e}", file=sys.stderr)
+    handle_error("init_db", e)
 
 
 async def search_city(city: str, page: Page, timeout=60000):
@@ -62,9 +70,7 @@ async def search_city(city: str, page: Page, timeout=60000):
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            print(f"search_city::Error: {e}",
-                  file=sys.stderr)
-            print("System is connected to internet => ", is_connected())
+            handle_error("search_city", e)
             break
     if retries == max_retries:
         print(
@@ -96,15 +102,44 @@ async def handle_response(response: Response):
                         return
                     insert_queries_data(hits)
                 except Exception as e:
-                    print(
-                        f"handle_response::inserting_queries::Error: {e}",
-                        file=sys.stderr)
+                    handle_error("handle_response::inserting_queries", e)
                     continue
 
     except Exception as e:
-        print(f"handle_response::Error: {e}",
-              file=sys.stderr)
-        print("System is connected to internet => ", is_connected())
+        handle_error("handle_response", e)
+
+
+async def process_page(new_page: Page, h2: List[str]):
+    print("******Inside process_page function*****")
+    try:
+        header = " ".join(await new_page.get_by_label("Property header").all_text_contents()).strip()
+        details = await new_page.get_by_label("property details").get_by_role("listitem").all()
+        desc = " ".join(await new_page.get_by_label("property description").all_text_contents()).strip()
+
+        # in_active_banner_count = await new_page.get_by_label("Inactive property banner").count()
+        # if in_active_banner_count > 0:
+        #     print("in-active property found!")
+        #     continue
+        key_value_obj: Dict[str, Any] = {
+            "header": " ".join(h2) + "\n" + header, "desc": desc
+        }
+        for li in details:
+            print("all locators in li ==> ", await li.locator("span").all())
+            key = "".join(await li.locator("span").first.all_text_contents()).strip()
+            value = "".join(await li.all_text_contents()).replace(key, "").strip()
+            print("key => ", key, " value => ", value)
+            if key.lower() == "price":
+                key_value_obj[key.lower()] = format_price(
+                    value)
+            elif key.lower() == "added":
+                key_value_obj[key.lower(
+                )] = relative_time_to_timestamp(value)
+            else:
+                key_value_obj[key.split(
+                    "(")[0].lower().replace(" ", "_")] = value
+        insert_property_data(key_value_obj)
+    except Exception as e:
+        handle_error("process_page", e)
 
 
 async def get_page_html_data(base_url: str, current_page: Page, context: BrowserContext):
@@ -126,45 +161,15 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
                         print("No href found in link!")
                         continue
                     await new_page.goto(base_url + href, timeout=60000)
-                    ul = []
-                    header = " ".join(await new_page.get_by_label("Property header").all_text_contents()).strip()
-                    details = await new_page.get_by_label("property details").get_by_role("listitem").all()
-                    desc = " ".join(await new_page.get_by_label("property description").all_text_contents()).strip()
-
-                    # in_active_banner_count = await new_page.get_by_label("Inactive property banner").count()
-                    # if in_active_banner_count > 0:
-                    #     print("in-active property found!")
-                    #     continue
-                    key_value_obj: Dict[str, Any] = {
-                        "header": " ".join(h2) + "\n" + header, "desc": desc
-                    }
-                    for li in details:
-                        print("all locators in li ==> ", await li.locator("span").all())
-                        key = "".join(await li.locator("span").first.all_text_contents()).strip()
-                        value = "".join(await li.all_text_contents()).replace(key, "").strip()
-                        print("key => ", key, " value => ", value)
-                        if key.lower() == "price":
-                            key_value_obj[key.lower()] = format_price(
-                                value)
-                        elif key.lower() == "added":
-                            key_value_obj[key.lower(
-                            )] = relative_time_to_timestamp(value)
-                        else:
-                            key_value_obj[key.split(
-                                "(")[0].lower().replace(" ", "_")] = value
-
-                    insert_property_data(key_value_obj)
+                    await process_page(new_page=new_page, h2=h2)
                     await new_page.close()
-                    print("ul ==> ", ul)
             break
 
         except PlaywrightTimeout:
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            print(f"get_page_html_data::Error: {e}", file=sys.stderr)
-            print("System is connected to internet => ", is_connected())
-            traceback.print_exc()
+            handle_error("get_page_html_data", e)
             break
     if retries == max_retries:
         print(
@@ -191,7 +196,7 @@ async def page_loaded(p: Page):
                     next_page = None
                 await get_page_html_data(base_url=base_url, current_page=p, context=context)
                 if count > 0 and next_page is not None:
-                    next_url = await next_page.get_attribute("href")
+                    next_url = await next_page.get_attribute("href", timeout=60000)
                     print("next_url ==> ")
                     if next_url is None:
                         print("No next_url found!!")
@@ -214,10 +219,7 @@ async def page_loaded(p: Page):
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            print(f"page_loaded::Error: {e}",
-                  file=sys.stderr)
-            print("System is connected to internet => ", is_connected())
-            traceback.print_exc()
+            handle_error("page_loaded", e)
             break
 
     if retries == max_retries:
@@ -246,9 +248,7 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
                 print("System is connected to internet => ", is_connected())
                 continue
             except Exception as e:
-                print(f"crawl_website::Error: {e}",
-                      file=sys.stderr)
-                print("System is connected to internet => ", is_connected())
+                handle_error("crawl_website", e)
                 continue
 
 # async def track_pages(page: Page):
@@ -294,7 +294,6 @@ async def main():
         try:
             await run(playwright)
         except Exception as e:
-            print(f"main::Error: {e}", file=sys.stderr)
-            print("System is connected to internet => ", is_connected())
+            handle_error("main", e)
 
 asyncio.run(main())
