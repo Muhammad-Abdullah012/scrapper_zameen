@@ -18,28 +18,28 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  scrapper_zameen:
-    image: scrapper_zameen_image
-    build:
-      context: .
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: '0.7g'
-        reservations:
-          cpus: '0.5'
-          memory: '0.3g'
-    container_name: scrapper_zameen_container
-    tty: true
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    volumes:
-      - ./:/app
-    depends_on:
-      - postgres
+  # scrapper_zameen:
+  #   image: scrapper_zameen_image
+  #   build:
+  #     context: .
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: '0.7g'
+  #       reservations:
+  #         cpus: '0.5'
+  #         memory: '0.3g'
+  #   container_name: scrapper_zameen_container
+  #   tty: true
+  #   ports:
+  #     - "8080:8080"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./:/app
+  #   depends_on:
+  #     - postgres
 volumes:
   postgres_data:
