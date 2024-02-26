@@ -11,14 +11,16 @@ from playwright.async_api import (
     Page,
     Response,
     TimeoutError as PlaywrightTimeout,
-    BrowserContext)
+    BrowserContext,
+)
 from utility import format_price, relative_time_to_timestamp
 from init_db import (
     init_db,
     insert_popularity_trends,
     insert_area_trends,
     insert_queries_data,
-    insert_property_data)
+    insert_property_data,
+)
 
 REMOTE_SERVER = "one.one.one.one"
 
@@ -63,7 +65,8 @@ async def search_city(city: str, page: Page, timeout=60000):
             await b.click(timeout=timeout)
 
             find_button = page.get_by_role("button").filter(
-                has_text=re.compile("^find$", re.IGNORECASE))
+                has_text=re.compile("^find$", re.IGNORECASE)
+            )
             await find_button.click(timeout=timeout)
             break
         except PlaywrightTimeout:
@@ -73,13 +76,16 @@ async def search_city(city: str, page: Page, timeout=60000):
             handle_error("search_city", e)
             break
     if retries == max_retries:
-        print(
-            f"Maximum retries reached. search_city failed for city: {city}")
+        print(f"Maximum retries reached. search_city failed for city: {city}")
     print("!!!search_city finished!!!")
 
 
 async def handle_response(response: Response):
-    if "queries" not in response.url and "areaTrends" not in response.url and "popularityTrends" not in response.url:
+    if (
+        "queries" not in response.url
+        and "areaTrends" not in response.url
+        and "popularityTrends" not in response.url
+    ):
         return
     print("data url ===>>> ", response.url)
     try:
@@ -121,10 +127,16 @@ async def fetch_details(page: Page):
 async def process_page(new_page: Page, h2: List[str]):
     print("******Inside process_page function*****")
     try:
-        header, details, desc = await asyncio.gather(fetch_all_text_contents(new_page, "Property header"), fetch_details(new_page), fetch_all_text_contents(new_page, "property description"))
-        # header = " ".join(await new_page.get_by_label("Property header").all_text_contents()).strip()
+        header, details, desc = await asyncio.gather(
+            fetch_all_text_contents(new_page, "Property header"),
+            fetch_details(new_page),
+            fetch_all_text_contents(new_page, "property description"),
+        )
+        # header = " ".join(await new_page.get_by_label("Property header")
+        # .all_text_contents()).strip()
         # details = await new_page.get_by_label("property details").get_by_role("listitem").all()
-        # desc = " ".join(await new_page.get_by_label("property description").all_text_contents()).strip()
+        # desc = " ".join(await new_page.get_by_label
+        # ("property description").all_text_contents()).strip()
 
         # in_active_banner_count = await new_page.get_by_label("Inactive property banner").count()
         # if in_active_banner_count > 0:
@@ -134,20 +146,22 @@ async def process_page(new_page: Page, h2: List[str]):
             return "".join(await element.all_text_contents()).strip()
 
         key_value_obj: Dict[str, Any] = {
-            "header": " ".join(h2) + "\n" + header, "desc": desc
+            "header": " ".join(h2) + "\n" + header,
+            "desc": desc,
         }
         for li in details:
             print("all locators in li ==> ", await li.locator("span").all())
-            key, value = await asyncio.gather(fetch_text_contents(li.locator("span").first), fetch_text_contents(li))
+            key, value = await asyncio.gather(
+                fetch_text_contents(li.locator(
+                    "span").first), fetch_text_contents(li)
+            )
             value = value.replace(key, "")
             # key = "".join(await li.locator("span").first.all_text_contents()).strip()
             # value = "".join(await li.all_text_contents()).replace(key, "").strip()
             if key.lower() == "price":
-                key_value_obj[key.lower()] = format_price(
-                    value)
+                key_value_obj[key.lower()] = format_price(value)
             elif key.lower() == "added":
-                key_value_obj[key.lower(
-                )] = relative_time_to_timestamp(value)
+                key_value_obj[key.lower()] = relative_time_to_timestamp(value)
             else:
                 key_value_obj[key.split(
                     "(")[0].lower().replace(" ", "_")] = value
@@ -156,20 +170,23 @@ async def process_page(new_page: Page, h2: List[str]):
         handle_error("process_page", e)
 
 
-async def get_page_html_data(base_url: str, current_page: Page, context: BrowserContext):
+async def get_page_html_data(
+    base_url: str, current_page: Page, context: BrowserContext
+):
     max_retries = 4
     retries = 0
     while retries < max_retries:
         try:
             article_tags = await current_page.locator("article").all()
-            print("Number of article tags => ", len(
-                article_tags))
+            print("Number of article tags => ", len(article_tags))
             for a in article_tags:
                 print("<article> ==>>>> ", a)
                 h2 = await a.locator("h2").all_text_contents()
                 print("h2 => ", h2)
                 if len(h2) > 0:
-                    href = await a.locator("a").first.get_attribute("href", timeout=60000)
+                    href = await a.locator("a").first.get_attribute(
+                        "href", timeout=60000
+                    )
                     if href is None:
                         print("No href found in link!")
                         continue
@@ -187,28 +204,35 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
             break
     if retries == max_retries:
         print(
-            f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}")
+            f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}"
+        )
     print("!!get_page_html_data Finished!!")
 
 
 async def page_loaded(p: Page):
     print("page_Loaded called")
     context = p.context
-    base_url = '/'.join(p.url.split("/")[:3])
+    base_url = "/".join(p.url.split("/")[:3])
     max_retries = 4
     retries = 0
     while retries < max_retries:
         try:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             while True:
-                count = await p.get_by_role("link").filter(
-                    has=p.get_by_title(re.compile("^Next$", re.IGNORECASE))).count()
+                count = (
+                    await p.get_by_role("link")
+                    .filter(has=p.get_by_title(re.compile("^Next$", re.IGNORECASE)))
+                    .count()
+                )
                 if count > 0:
                     next_page = p.get_by_role("link").filter(
-                        has=p.get_by_title(re.compile("^Next$", re.IGNORECASE)))
+                        has=p.get_by_title(re.compile("^Next$", re.IGNORECASE))
+                    )
                 else:
                     next_page = None
-                await get_page_html_data(base_url=base_url, current_page=p, context=context)
+                await get_page_html_data(
+                    base_url=base_url, current_page=p, context=context
+                )
                 if count > 0 and next_page is not None:
                     next_url = await next_page.get_attribute("href", timeout=60000)
                     print("next_url ==> ")
@@ -217,7 +241,7 @@ async def page_loaded(p: Page):
                         break
                     dot = next_url.rfind(".")
                     hyphen = next_url.rfind("-")
-                    page_no = next_url[hyphen + 1:dot]
+                    page_no = next_url[hyphen + 1: dot]
                     # ONLY 1st 2 Pages!
                     # if int(page_no) >= 1:
                     #     break
@@ -226,7 +250,9 @@ async def page_loaded(p: Page):
                 else:
                     break
 
-            print("end of loop!!", )
+            print(
+                "end of loop!!",
+            )
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             break
         except PlaywrightTimeout:
@@ -237,9 +263,10 @@ async def page_loaded(p: Page):
             break
 
     if retries == max_retries:
-        print(
-            f"Maximum retries reached. page_loaded failed for url: {p.url}")
+        print(f"Maximum retries reached. page_loaded failed for url: {p.url}")
     print("!!page_Loaded Finished!!")
+
+
 # Crawl website
 
 
@@ -247,7 +274,9 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
     print(f"Visiting: {url}, currently at depth {depth}")
     await page.goto(url, timeout=60000)
     for link in links:
-        links_to_visit = await page.locator(f'a[href*="{link}"]:link:not([href^="http"])').all()
+        links_to_visit = await page.locator(
+            f'a[href*="{link}"]:link:not([href^="http"])'
+        ).all()
         for locator in links_to_visit:
             try:
                 href = await locator.get_attribute("href")
@@ -258,12 +287,14 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
             except PlaywrightTimeout:
                 print(
                     f"crawl_website::Timeout error while getting attribute {locator}",
-                    file=sys.stderr)
+                    file=sys.stderr,
+                )
                 print("System is connected to internet => ", is_connected())
                 continue
             except Exception as e:
                 handle_error("crawl_website", e)
                 continue
+
 
 # async def track_pages(page: Page):
 #     page.on("load", page_loaded)
@@ -283,7 +314,8 @@ async def run(playwright: Playwright):
 
     context.on("response", response_handler)
     # page.on("load", page_loaded)
-    # await crawl_website(page, "https://www.zameen.com", links=input_file["links"], depth=0, browser_context=context)
+    # await crawl_website(page, "https://www.zameen.com",
+    # links=input_file["links"], depth=0, browser_context=context)
     # await page.goto("https://www.zameen.com", timeout=0)
     # await page.goto("https://www.zameen.com/Homes/Islamabad-3-159.html", timeout=0)
     # await page_loaded(page)
@@ -309,5 +341,6 @@ async def main():
             await run(playwright)
         except Exception as e:
             handle_error("main", e)
+
 
 asyncio.run(main())

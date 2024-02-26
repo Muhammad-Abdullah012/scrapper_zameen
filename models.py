@@ -11,14 +11,16 @@ from peewee import (
     CharField,
     DateField,
     BooleanField,
-    TextField)
+    TextField,
+)
 
 dotenv.load_dotenv()
 db = PostgresqlExtDatabase(
     os.environ.get("POSTGRES_DB"),
     user=os.environ.get("POSTGRES_USER"),
     password=os.environ.get("POSTGRES_PASSWORD"),
-    host=os.environ.get("POSTGRES_HOST"))
+    host=os.environ.get("POSTGRES_HOST"),
+)
 
 
 class BaseModel(Model):
@@ -55,7 +57,8 @@ class Property_Trend_Index(BaseModel):
 class Property_Trend_Change_Percentage_By_Price(BaseModel):
     id = AutoField()
     property = ForeignKeyField(
-        Property_Trend, backref="property_change_percentage_by_price")
+        Property_Trend, backref="property_change_percentage_by_price"
+    )
     month_year = TimestampField()
     value = IntegerField()
     avg_price_per_sqft = IntegerField()
@@ -80,7 +83,8 @@ class Type(BaseModel):
 class Property_Trend_Change_Percentage_By_Price_Per_Sqft(BaseModel):
     id = AutoField()
     property = ForeignKeyField(
-        Property_Trend, backref="property_change_percentage_by_price_per_sqft")
+        Property_Trend, backref="property_change_percentage_by_price_per_sqft"
+    )
     month_year = TimestampField()
     value = IntegerField()
     avg_price_per_sqft = IntegerField()
@@ -109,6 +113,7 @@ class Parent_Location(BaseModel):
     level = IntegerField()
     name = CharField(max_length=255)
     name_l1 = CharField(max_length=255)
+
 
 # Define the Trend model
 

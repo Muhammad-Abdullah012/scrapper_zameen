@@ -11,14 +11,14 @@ try:
 except Exception as e:
     print(f"init_db::Error: {e}", file=sys.stderr)
 
-SCRIPT_PATH = os.getcwd() + '/scrape.py'
+SCRIPT_PATH = os.getcwd() + "/scrape.py"
 
 print("SCRIPT_PATH ==>> ", SCRIPT_PATH)
 
 
 def job():
     try:
-        subprocess.run(['python3', SCRIPT_PATH], check=True)
+        subprocess.run(["python3", SCRIPT_PATH], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error running the script: {e}")
 
