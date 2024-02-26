@@ -156,10 +156,10 @@ async def get_page_html_data(base_url: str, current_page: Page, context: Browser
                 print("h2 => ", h2)
                 if len(h2) > 0:
                     href = await a.locator("a").first.get_attribute("href", timeout=60000)
-                    new_page = await context.new_page()
                     if href is None:
                         print("No href found in link!")
                         continue
+                    new_page = await context.new_page()
                     await new_page.goto(base_url + href, timeout=60000)
                     await process_page(new_page=new_page, h2=h2)
                     await new_page.close()
