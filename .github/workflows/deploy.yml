@@ -39,7 +39,7 @@ jobs:
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/scripts/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/$REPO_NAME/scripts
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/$REPO_NAME
           scp -i ec2_private_key.pem -o StrictHostKeyChecking=no $(pwd)/.env ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/$REPO_NAME
-          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd $REPO_NAME && chmod +x ./*.sh"
+          ssh -i ec2_private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd $REPO_NAME/scripts && chmod +x ./*.sh"
       - name: Deploy to EC2
         env:
           REPO_NAME: ${{ github.event.repository.name }}
