@@ -72,7 +72,9 @@ class Purpose(BaseModel):
 class Type(BaseModel):
     id = AutoField()
     title = CharField()
+    title_l1 = CharField()
     alternate_title = CharField()
+    alternate_title_l1 = CharField()
 
 
 class Property_Trend_Change_Percentage_By_Price_Per_Sqft(BaseModel):
