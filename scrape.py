@@ -45,8 +45,8 @@ print("System is connected to internet => ", is_connected())
 
 try:
     init_db()
-except Exception as e:
-    handle_error("init_db", e)
+except Exception as err:
+    handle_error("init_db", err)
 
 
 async def search_city(city: str, page: Page, timeout=60000):
