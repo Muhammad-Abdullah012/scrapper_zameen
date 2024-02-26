@@ -1,4 +1,3 @@
-
 import traceback
 import sys
 from typing import List, Any, Dict
@@ -17,7 +16,8 @@ from models import (
     Type,
     Parent_Location_With_ExternalID,
     Property,
-    Property_V2)
+    Property_V2,
+)
 
 
 def init_db():
@@ -34,7 +34,8 @@ def init_db():
         Property,
         Property_V2,
         Property_Trend_Change_Percentage_By_Price,
-        Property_Trend_Change_Percentage_By_Price_Per_Sqft]
+        Property_Trend_Change_Percentage_By_Price_Per_Sqft,
+    ]
 
     db.create_tables(tables_to_create)
 
@@ -193,9 +194,11 @@ def insert_area_trends(area_trends: dict):
         id = index["id"]
         print("*************************************")
         for key, value in index.items():
-            if not isinstance(
-                    value, list) and not isinstance(
-                    value, dict) and value is not None:
+            if (
+                not isinstance(value, list)
+                and not isinstance(value, dict)
+                and value is not None
+            ):
                 key_value_obj[key] = value
 
         print("INSERTING VALUES IN property TABLE ==> ", key_value_obj)
@@ -203,8 +206,9 @@ def insert_area_trends(area_trends: dict):
         if get_by_id is None:
             Property_Trend.create(**key_value_obj)
         else:
-            Property_Trend.update(
-                **key_value_obj).where(Property_Trend.id == id).execute()
+            Property_Trend.update(**key_value_obj).where(
+                Property_Trend.id == id
+            ).execute()
 
         for key, value in index.items():
             print("key => ", key, "value ==> ", value)
@@ -222,8 +226,9 @@ def insert_area_trends(area_trends: dict):
                             if get_by_id is None:
                                 Property_Trend_Index.create(**v)
                             else:
-                                Property_Trend_Index.update(
-                                    **v).where(Property_Trend_Index.id == v.get("id")).execute()
+                                Property_Trend_Index.update(**v).where(
+                                    Property_Trend_Index.id == v.get("id")
+                                ).execute()
                             # Property_Trend_Index.get_or_create(**v)
             elif isinstance(value, dict):
                 if key == "purpose":
@@ -236,15 +241,22 @@ def insert_area_trends(area_trends: dict):
                         v["month_year"] = isoparse(month_year).timestamp()
                         v["property"] = id
                         print(
-                            "values inserting in Property_Trend_Change_Percentage_By_Price => ", v)
-                        get_by_id = Property_Trend_Change_Percentage_By_Price.get_or_none(
-                            id=v.get("id"))
+                            "values inserting in Property_Trend_Change_Percentage_By_Price => ",
+                            v,
+                        )
+                        get_by_id = (
+                            Property_Trend_Change_Percentage_By_Price.get_or_none(
+                                id=v.get("id")
+                            )
+                        )
                         if get_by_id is None:
                             Property_Trend_Change_Percentage_By_Price.create(
                                 **v)
                         else:
-                            Property_Trend_Change_Percentage_By_Price.update(
-                                **v).where(Property_Trend_Change_Percentage_By_Price.id == v.get("id")).execute()
+                            Property_Trend_Change_Percentage_By_Price.update(**v).where(
+                                Property_Trend_Change_Percentage_By_Price.id
+                                == v.get("id")
+                            ).execute()
                         # Property_Trend_Change_Percentage_By_Price.get_or_create(
                         #     **v)
                 if key == "change_percentage_by_price_per_sqft":
@@ -253,15 +265,23 @@ def insert_area_trends(area_trends: dict):
                         v["month_year"] = isoparse(month_year).timestamp()
                         v["property"] = id
                         print(
-                            "values inserting in Property_Trend_Change_Percentage_By_Price_Per_Sqft => ", v)
+                            "values in Property_Trend_Change_Percentage_By_Price_Per_Sqft => ",
+                            v,
+                        )
                         get_by_id = Property_Trend_Change_Percentage_By_Price_Per_Sqft.get_or_none(
-                            id=v.get("id"))
+                            id=v.get("id")
+                        )
                         if get_by_id is None:
                             Property_Trend_Change_Percentage_By_Price_Per_Sqft.create(
-                                **v)
+                                **v
+                            )
                         else:
                             Property_Trend_Change_Percentage_By_Price_Per_Sqft.update(
-                                **v).where(Property_Trend_Change_Percentage_By_Price_Per_Sqft.id == v.get("id")).execute()
+                                **v
+                            ).where(
+                                Property_Trend_Change_Percentage_By_Price_Per_Sqft.id
+                                == v.get("id")
+                            ).execute()
                         # Property_Trend_Change_Percentage_By_Price_Per_Sqft.get_or_create(
                         #     **v)
 
@@ -299,15 +319,15 @@ def insert_queries_data(data: List[dict]):
                     if item["price"] != get_by_id["price"]:
                         get_by_id["price_history"].append(get_by_id["price"])
                         instance.save()
-                        Property.update(id=item["id"],
-                                        state=item["state"],
-                                        purpose=item["purpose"],
-                                        price=item["price"],
-                                        product=item["product"],
-                                        title=item.get(
-                            "title", item.get("name", "")),
+                        Property.update(
+                            id=item["id"],
+                            state=item["state"],
+                            purpose=item["purpose"],
+                            price=item["price"],
+                            product=item["product"],
+                            title=item.get("title", item.get("name", "")),
                             title_l1=item.get(
-                            "title_l1", item.get("name_l1", "")),
+                                "title_l1", item.get("name_l1", "")),
                             rooms=item["rooms"],
                             baths=item["baths"],
                             area=item["area"],
@@ -316,24 +336,23 @@ def insert_queries_data(data: List[dict]):
                             createdAt=item.get("createdAt", 0),
                             updatedAt=item.get("updatedAt", 0),
                             desc=item.get(
-                            "shortDescription", item.get("description", "")),
-                            location_id=location[-1]["id"]
+                                "shortDescription", item.get("description", "")
+                            ),
+                            location_id=location[-1]["id"],
                         ).where(Property.id == item.get("id")).execute()
                     else:
                         print(
-                            item["price"],
-                            " <= price is same => ",
-                            get_by_id["price"])
+                            item["price"], " <= price is same => ", get_by_id["price"]
+                        )
                 except DoesNotExist:
-                    Property.create(id=item["id"],
-                                    state=item["state"],
-                                    purpose=item["purpose"],
-                                    price=item["price"],
-                                    product=item["product"],
-                                    title=item.get(
-                        "title", item.get("name", "")),
-                        title_l1=item.get(
-                        "title_l1", item.get("name_l1", "")),
+                    Property.create(
+                        id=item["id"],
+                        state=item["state"],
+                        purpose=item["purpose"],
+                        price=item["price"],
+                        product=item["product"],
+                        title=item.get("title", item.get("name", "")),
+                        title_l1=item.get("title_l1", item.get("name_l1", "")),
                         rooms=item["rooms"],
                         baths=item["baths"],
                         area=item["area"],
@@ -341,9 +360,9 @@ def insert_queries_data(data: List[dict]):
                         longitude=geography["lng"],
                         createdAt=item.get("createdAt", 0),
                         updatedAt=item.get("updatedAt", 0),
-                        desc=item.get(
-                        "shortDescription", item.get("description", "")),
-                        location_id=location[-1]["id"]
+                        desc=item.get("shortDescription",
+                                      item.get("description", "")),
+                        location_id=location[-1]["id"],
                     )
 
                 # if get_by_id is None:
