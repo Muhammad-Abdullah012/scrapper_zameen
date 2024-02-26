@@ -109,25 +109,39 @@ async def handle_response(response: Response):
         handle_error("handle_response", e)
 
 
+async def fetch_all_text_contents(page: Page, label: str):
+    elements = await page.get_by_label(label).all_text_contents()
+    return " ".join(elements).strip()
+
+
+async def fetch_details(page: Page):
+    return await page.get_by_label("property details").get_by_role("listitem").all()
+
+
 async def process_page(new_page: Page, h2: List[str]):
     print("******Inside process_page function*****")
     try:
-        header = " ".join(await new_page.get_by_label("Property header").all_text_contents()).strip()
-        details = await new_page.get_by_label("property details").get_by_role("listitem").all()
-        desc = " ".join(await new_page.get_by_label("property description").all_text_contents()).strip()
+        header, details, desc = await asyncio.gather(fetch_all_text_contents(new_page, "Property header"), fetch_details(new_page), fetch_all_text_contents(new_page, "property description"))
+        # header = " ".join(await new_page.get_by_label("Property header").all_text_contents()).strip()
+        # details = await new_page.get_by_label("property details").get_by_role("listitem").all()
+        # desc = " ".join(await new_page.get_by_label("property description").all_text_contents()).strip()
 
         # in_active_banner_count = await new_page.get_by_label("Inactive property banner").count()
         # if in_active_banner_count > 0:
         #     print("in-active property found!")
         #     continue
+        async def fetch_text_contents(element):
+            return "".join(await element.all_text_contents()).strip()
+
         key_value_obj: Dict[str, Any] = {
             "header": " ".join(h2) + "\n" + header, "desc": desc
         }
         for li in details:
             print("all locators in li ==> ", await li.locator("span").all())
-            key = "".join(await li.locator("span").first.all_text_contents()).strip()
-            value = "".join(await li.all_text_contents()).replace(key, "").strip()
-            print("key => ", key, " value => ", value)
+            key, value = await asyncio.gather(fetch_text_contents(li.locator("span").first), fetch_text_contents(li))
+            value = value.replace(key, "")
+            # key = "".join(await li.locator("span").first.all_text_contents()).strip()
+            # value = "".join(await li.all_text_contents()).replace(key, "").strip()
             if key.lower() == "price":
                 key_value_obj[key.lower()] = format_price(
                     value)
