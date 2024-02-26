@@ -8,8 +8,8 @@ from init_db import init_db
 
 try:
     init_db()
-except Exception as e:
-    print(f"init_db::Error: {e}", file=sys.stderr)
+except Exception as err:
+    print(f"init_db::Error: {err}", file=sys.stderr)
 
 SCRIPT_PATH = os.getcwd() + "/scrape.py"
 
