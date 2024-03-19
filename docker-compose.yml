@@ -10,7 +10,7 @@ services:
         limits:
           cpus: '0.5'
           # mem_limit: ""
-          memory: '0.3g'
+          memory: '0.5g'
     ports:
       - "5432:5432"
     env_file:
@@ -26,8 +26,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: '0.7g'
+          cpus: '1'
+          memory: '1g'
         reservations:
           memory: '0.3g'
     container_name: scrapper_zameen_container
