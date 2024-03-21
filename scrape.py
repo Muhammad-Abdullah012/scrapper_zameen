@@ -36,8 +36,8 @@ def is_connected():
     return False
 
 
-def handle_error(function_name: str, error: Exception):
-    print(f"{function_name}::Error: {error}", file=sys.stderr)
+def handle_error(function_name: str, error: Exception, url: str):
+    print(f"{function_name}::Error: {error} url => {url}", file=sys.stderr)
     print("System is connected to the internet => ", is_connected())
     traceback.print_exc()
     sleep(10)
@@ -48,7 +48,7 @@ print("System is connected to internet => ", is_connected())
 try:
     init_db()
 except Exception as err:
-    handle_error("init_db", err)
+    handle_error("init_db", err, "")
 
 
 async def search_city(city: str, page: Page, timeout=60000):
@@ -73,7 +73,7 @@ async def search_city(city: str, page: Page, timeout=60000):
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            handle_error("search_city", e)
+            handle_error("search_city", e, page.url)
             break
     if retries == max_retries:
         print(f"Maximum retries reached. search_city failed for city: {city}")
@@ -108,11 +108,12 @@ async def handle_response(response: Response):
                         return
                     insert_queries_data(hits)
                 except Exception as e:
-                    handle_error("handle_response::inserting_queries", e)
+                    handle_error(
+                        "handle_response::inserting_queries", e, "handle_response")
                     continue
 
     except Exception as e:
-        handle_error("handle_response", e)
+        handle_error("handle_response", e, "handle_response")
 
 
 async def fetch_all_text_contents(page: Page, label: str):
@@ -167,7 +168,7 @@ async def process_page(new_page: Page, h2: List[str]):
                     "(")[0].lower().replace(" ", "_")] = value
         insert_property_data(key_value_obj)
     except Exception as e:
-        handle_error("process_page", e)
+        handle_error("process_page", e, new_page.url)
 
 
 async def get_page_html_data(
@@ -200,7 +201,7 @@ async def get_page_html_data(
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            handle_error("get_page_html_data", e)
+            handle_error("get_page_html_data", e, current_page.url)
             break
     if retries == max_retries:
         print(
@@ -259,7 +260,7 @@ async def page_loaded(p: Page):
             await asyncio.sleep(30)
             retries += 1
         except Exception as e:
-            handle_error("page_loaded", e)
+            handle_error("page_loaded", e, p.url)
             break
 
     if retries == max_retries:
@@ -292,15 +293,13 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
                 print("System is connected to internet => ", is_connected())
                 continue
             except Exception as e:
-                handle_error("crawl_website", e)
+                handle_error("crawl_website", e, page.url)
                 continue
 
 
 # async def track_pages(page: Page):
 #     page.on("load", page_loaded)
-
-
-async def run(playwright: Playwright):
+async def initialize_chromium(playwright: Playwright):
     chromium = playwright.chromium
     browser = await chromium.launch()
     context = await browser.new_context()
@@ -313,34 +312,4 @@ async def run(playwright: Playwright):
         await task_queue.put(await handle_response(response))
 
     context.on("response", response_handler)
-    # page.on("load", page_loaded)
-    # await crawl_website(page, "https://www.zameen.com",
-    # links=input_file["links"], depth=0, browser_context=context)
-    # await page.goto("https://www.zameen.com", timeout=0)
-    # await page.goto("https://www.zameen.com/Homes/Islamabad-3-159.html", timeout=0)
-    # await page_loaded(page)
-    cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
-    for city in cities:
-        await page.goto("https://www.zameen.com", timeout=0)
-        await search_city(city=city, page=page)
-        await page_loaded(page)
-
-    print("System is connected to internet => ", is_connected())
-    tasks = [task_queue.get() for _ in range(task_queue.qsize())]
-    print(f"Waiting for {len(tasks)} tasks!!")
-    await asyncio.gather(*tasks)
-    print("Wait Finished!!")
-
-    await context.close()
-    await browser.close()
-
-
-async def main():
-    async with async_playwright() as playwright:
-        try:
-            await run(playwright)
-        except Exception as e:
-            handle_error("main", e)
-
-
-asyncio.run(main())
+    return (page, context, browser, task_queue)

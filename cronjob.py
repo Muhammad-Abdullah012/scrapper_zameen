@@ -11,7 +11,7 @@ try:
 except Exception as err:
     print(f"init_db::Error: {err}", file=sys.stderr)
 
-SCRIPT_PATH = os.getcwd() + "/scrape.py"
+SCRIPT_PATH = os.getcwd() + "/scrapper_main.py"
 
 print("SCRIPT_PATH ==>> ", SCRIPT_PATH)
 
