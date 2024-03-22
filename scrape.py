@@ -16,6 +16,7 @@ from playwright.async_api import (
 from utility import format_price, relative_time_to_timestamp
 from init_db import (
     init_db,
+    insert_failure_data,
     insert_popularity_trends,
     insert_area_trends,
     insert_queries_data,
@@ -76,7 +77,9 @@ async def search_city(city: str, page: Page, timeout=60000):
             handle_error("search_city", e, page.url)
             break
     if retries == max_retries:
-        print(f"Maximum retries reached. search_city failed for city: {city}")
+        desc = f"Maximum retries reached. search_city failed for city: {city}"
+        print(desc)
+        insert_failure_data(desc=desc, url=page.url)
     print("!!!search_city finished!!!")
 
 
@@ -109,7 +112,8 @@ async def handle_response(response: Response):
                     insert_queries_data(hits)
                 except Exception as e:
                     handle_error(
-                        "handle_response::inserting_queries", e, "handle_response")
+                        "handle_response::inserting_queries", e, "handle_response"
+                    )
                     continue
 
     except Exception as e:
@@ -204,9 +208,9 @@ async def get_page_html_data(
             handle_error("get_page_html_data", e, current_page.url)
             break
     if retries == max_retries:
-        print(
-            f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}"
-        )
+        desc = f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}"
+        print(desc)
+        insert_failure_data(desc=desc, url=current_page.url)
     print("!!get_page_html_data Finished!!")
 
 
@@ -264,7 +268,9 @@ async def page_loaded(p: Page):
             break
 
     if retries == max_retries:
-        print(f"Maximum retries reached. page_loaded failed for url: {p.url}")
+        desc = f"Maximum retries reached. page_loaded failed for url: {p.url}"
+        print(desc)
+        insert_failure_data(desc=desc, url=p.url)
     print("!!page_Loaded Finished!!")
 
 

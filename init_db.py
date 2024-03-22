@@ -4,6 +4,7 @@ from typing import List, Any, Dict
 from dateutil.parser import isoparse
 from peewee import DoesNotExist
 from models import (
+    Failed,
     db,
     Location,
     Property_Trend,
@@ -38,7 +39,7 @@ def init_db():
     ]
 
     db.create_tables(tables_to_create)
-
+    db.create_tables([Failed])
     db.close()
 
 
@@ -452,6 +453,17 @@ def insert_property_data(data: Dict[str, Any]):
         Property_V2.get_or_create(**data)
     except Exception as e:
         print(f"insert_property_data::Error: {e}", file=sys.stderr)
+        traceback.print_exc()
+    finally:
+        db.close()
+
+
+def insert_failure_data(desc: str, url: str):
+    try:
+        db.connect(reuse_if_open=True)
+        Failed.create(**{desc: desc, url: url})
+    except Exception as e:
+        print(f"insert_failure_data::Error: {e}", file=sys.stderr)
         traceback.print_exc()
     finally:
         db.close()
