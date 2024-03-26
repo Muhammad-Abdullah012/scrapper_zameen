@@ -38,7 +38,9 @@ def is_connected():
 
 
 def handle_error(function_name: str, error: Exception, url: str):
-    print(f"{function_name}::Error: {error} url => {url}", file=sys.stderr)
+    desc = f"{function_name}::Error: {error} url => {url}"
+    print(desc, file=sys.stderr)
+    insert_failure_data(desc=desc, url=url)
     print("System is connected to the internet => ", is_connected())
     traceback.print_exc()
     sleep(10)
@@ -240,7 +242,6 @@ async def page_loaded(p: Page):
                 )
                 if count > 0 and next_page is not None:
                     next_url = await next_page.get_attribute("href", timeout=60000)
-                    print("next_url ==> ")
                     if next_url is None:
                         print("No next_url found!!")
                         break
