@@ -450,8 +450,13 @@ def insert_queries_data(data: List[dict]):
 def insert_property_data(data: Dict[str, Any]):
     print("insert_property_data::data==> ", data)
     try:
+        url = data.get("url")
         db.connect(reuse_if_open=True)
-        Property_V2.get_or_create(**data)
+        existing_property = Property_V2.get_or_none(url=url)
+        if existing_property is not None:
+            existing_property.update(**data).where(url=url).execute()
+        else:
+            Property_V2.create(**data)
     except Exception as e:
         print(f"insert_property_data::Error: {e}", file=sys.stderr)
         traceback.print_exc()
