@@ -40,6 +40,7 @@ def init_db():
 
     db.create_tables(tables_to_create)
     db.create_tables([Failed])
+    db.execute_sql("ALTER TABLE property_v2 ADD COLUMN url text")
     db.close()
 
 

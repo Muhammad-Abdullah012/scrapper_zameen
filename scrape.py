@@ -155,6 +155,7 @@ async def process_page(new_page: Page, h2: List[str]):
         key_value_obj: Dict[str, Any] = {
             "header": " ".join(h2) + "\n" + header,
             "desc": desc,
+            "url": new_page.url,
         }
         for li in details:
             print("all locators in li ==> ", await li.locator("span").all())
