@@ -168,6 +168,7 @@ class Property_V2(BaseModel):
     initial_amount = CharField(null=True)
     monthly_installment = CharField(null=True)
     remaining_installments = CharField(null=True)
+    url = TextField(null=True)
 
 
 class Failed(BaseModel):
