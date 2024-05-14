@@ -12,6 +12,8 @@ from peewee import (
     DateField,
     BooleanField,
     TextField,
+    DateTimeField,
+    SQL,
 )
 
 dotenv.load_dotenv()
@@ -24,6 +26,9 @@ db = PostgresqlExtDatabase(
 
 
 class BaseModel(Model):
+    created_at = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    updated_at = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+
     class Meta:
         database = db
 

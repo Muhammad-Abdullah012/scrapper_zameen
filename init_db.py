@@ -18,12 +18,22 @@ from models import (
     Parent_Location_With_ExternalID,
     Property,
     Property_V2,
+    BaseModel,
 )
 
 
 def init_db():
     db.connect(reuse_if_open=True)
-    tables_to_create = [
+    db.execute_sql(
+        """CREATE OR REPLACE FUNCTION update_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = CURRENT_TIMESTAMP;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;"""
+    )
+    tables_to_create: List[type[BaseModel]] = [
         Trend,
         Location,
         Parent_Location,
@@ -41,6 +51,24 @@ def init_db():
     db.create_tables(tables_to_create)
     db.create_tables([Failed])
     db.execute_sql("ALTER TABLE property_v2 ADD COLUMN IF NOT EXISTS url text")
+    tables_to_create.append(Failed)
+    for table_class in tables_to_create:
+        table_name = table_class._meta.name
+        db.execute_sql(
+            f"""
+                ALTER TABLE {table_name}
+                    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+            """
+        )
+        db.execute_sql(
+            f"""
+                CREATE OR REPLACE TRIGGER update_table_trigger BEFORE
+                UPDATE ON {table_name} FOR EACH ROW
+                EXECUTE PROCEDURE update_updated_at ();
+            """
+        )
+
     db.close()
 
 
