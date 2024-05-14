@@ -17,4 +17,4 @@ COPY . /app
 RUN find . -type f -name "*.py" -exec chmod +x {} +
 RUN chmod +x ./cronjob.py
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port 3000 > logs.log 2>&1"]
