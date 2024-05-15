@@ -24,20 +24,25 @@ async def run(playwright: Playwright):
     (page, context, browser, task_queue) = await initialize_chromium(
         playwright=playwright
     )
-    cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
-    for city in cities:
-        await page.goto(baseUrl, timeout=0)
-        await search_city(city=city, page=page)
-        await page_loaded(page)
+    try:
+        cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
+        for city in cities:
+            await page.goto(baseUrl, timeout=0)
+            await search_city(city=city, page=page)
+            await page_loaded(page)
 
-    print("System is connected to internet => ", is_connected())
-    tasks = [task_queue.get() for _ in range(task_queue.qsize())]
-    print(f"Waiting for {len(tasks)} tasks!!")
-    await asyncio.gather(*tasks)
-    print("Wait Finished!!")
-
-    await context.close()
-    await browser.close()
+        print("System is connected to internet => ", is_connected())
+        tasks = [task_queue.get() for _ in range(task_queue.qsize())]
+        print(f"Waiting for {len(tasks)} tasks!!")
+        await asyncio.gather(*tasks)
+        print("Wait Finished!!")
+    except Exception as e:
+        handle_error("run", e, "run")
+    finally:
+        if 'context' in locals():
+            await context.close()
+        if 'browser' in locals():
+            await browser.close()
 
 
 async def run_main():
