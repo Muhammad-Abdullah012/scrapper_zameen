@@ -1,5 +1,7 @@
+import os
 import re
 import sys
+import logging
 import asyncio
 from time import sleep
 import traceback
@@ -24,6 +26,13 @@ from init_db import (
 )
 
 REMOTE_SERVER = "one.one.one.one"
+mode = os.getenv("MODE", "RELEASE")
+
+# Configure the logging
+if mode == "DEBUG":
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 
 def is_connected():
@@ -39,9 +48,9 @@ def is_connected():
 
 def handle_error(function_name: str, error: Exception, url: str):
     desc = f"{function_name}::Error: {error} url => {url}"
-    print(desc, file=sys.stderr)
+    logging.error(desc)
     insert_failure_data(desc=desc, url=url)
-    print("System is connected to the internet => ", is_connected())
+    logging.debug("System is connected to the internet => %s", is_connected())
     traceback.print_exc()
     sleep(10)
 
@@ -62,9 +71,8 @@ async def search_city(city: str, page: Page, timeout=60000):
             locator = page.get_by_label("city filter")
             await locator.click(timeout=timeout)
             button = page.get_by_role("listbox").last
-            print("button ==> ", button)
+            logging.debug("button ==> %s", button)
             b = button.locator("button", has_text=city)
-            print("b ==> ", b)
             await b.click(timeout=timeout)
 
             find_button = page.get_by_role("button").filter(
@@ -80,9 +88,9 @@ async def search_city(city: str, page: Page, timeout=60000):
             break
     if retries == max_retries:
         desc = f"Maximum retries reached. search_city failed for city: {city}"
-        print(desc)
+        logging.debug(desc)
         insert_failure_data(desc=desc, url=page.url)
-    print("!!!search_city finished!!!")
+    logging.info("!!!search_city finished!!!")
 
 
 async def handle_response(response: Response):
@@ -92,10 +100,10 @@ async def handle_response(response: Response):
         and "popularityTrends" not in response.url
     ):
         return
-    print("data url ===>>> ", response.url)
+    logging.debug("data url ===>>> %s", response.url)
     try:
         json_data = await response.json()
-        print("json_data ===>>>", json_data)
+        logging.debug("json_data ===>>> %s", json_data)
         if "areaTrends" in response.url:
             insert_area_trends(json_data)
 
@@ -109,7 +117,7 @@ async def handle_response(response: Response):
                 try:
                     hits = results["hits"]
                     if len(hits) == 0:
-                        print("hits is empty array!!!!!")
+                        logging.debug("hits is empty array!!!!!")
                         return
                     insert_queries_data(hits)
                 except Exception as e:
@@ -132,7 +140,7 @@ async def fetch_details(page: Page):
 
 
 async def process_page(new_page: Page, h2: List[str]):
-    print("******Inside process_page function*****")
+    logging.info("******Inside process_page function*****")
     try:
         header, details, desc = await asyncio.gather(
             fetch_all_text_contents(new_page, "Property header"),
@@ -158,10 +166,9 @@ async def process_page(new_page: Page, h2: List[str]):
             "url": new_page.url,
         }
         for li in details:
-            print("all locators in li ==> ", await li.locator("span").all())
+            logging.debug("all locators in li ==> %s", await li.locator("span").all())
             key, value = await asyncio.gather(
-                fetch_text_contents(li.locator(
-                    "span").first), fetch_text_contents(li)
+                fetch_text_contents(li.locator("span").first), fetch_text_contents(li)
             )
             value = value.replace(key, "")
             # key = "".join(await li.locator("span").first.all_text_contents()).strip()
@@ -171,8 +178,7 @@ async def process_page(new_page: Page, h2: List[str]):
             elif key.lower() == "added":
                 key_value_obj[key.lower()] = relative_time_to_timestamp(value)
             else:
-                key_value_obj[key.split(
-                    "(")[0].lower().replace(" ", "_")] = value
+                key_value_obj[key.split("(")[0].lower().replace(" ", "_")] = value
         insert_property_data(key_value_obj)
     except Exception as e:
         handle_error("process_page", e, new_page.url)
@@ -186,17 +192,17 @@ async def get_page_html_data(
     while retries < max_retries:
         try:
             article_tags = await current_page.locator("article").all()
-            print("Number of article tags => ", len(article_tags))
+            logging.debug("Number of article tags => %s", len(article_tags))
             for a in article_tags:
-                print("<article> ==>>>> ", a)
+                logging.debug("<article> ==>>>> %s", a)
                 h2 = await a.locator("h2").all_text_contents()
-                print("h2 => ", h2)
+                logging.debug("h2 => %s", h2)
                 if len(h2) > 0:
                     href = await a.locator("a").first.get_attribute(
                         "href", timeout=60000
                     )
                     if href is None:
-                        print("No href found in link!")
+                        logging.debug("No href found in link!")
                         continue
                     new_page = await context.new_page()
                     await new_page.goto(base_url + href, timeout=60000)
@@ -212,20 +218,22 @@ async def get_page_html_data(
             break
     if retries == max_retries:
         desc = f"Maximum retries reached. get_page_html_data failed for url: {current_page.url}"
-        print(desc)
+        logging.debug(desc)
         insert_failure_data(desc=desc, url=current_page.url)
-    print("!!get_page_html_data Finished!!")
+    logging.info("!!get_page_html_data Finished!!")
 
 
 async def page_loaded(p: Page):
-    print("page_Loaded called")
+    logging.info("page_Loaded called")
     context = p.context
     base_url = "/".join(p.url.split("/")[:3])
     max_retries = 4
     retries = 0
     while retries < max_retries:
         try:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            logging.debug(
+                "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            )
             while True:
                 count = (
                     await p.get_by_role("link")
@@ -244,11 +252,11 @@ async def page_loaded(p: Page):
                 if count > 0 and next_page is not None:
                     next_url = await next_page.get_attribute("href", timeout=60000)
                     if next_url is None:
-                        print("No next_url found!!")
+                        logging.debug("No next_url found!!")
                         break
                     dot = next_url.rfind(".")
                     hyphen = next_url.rfind("-")
-                    page_no = next_url[hyphen + 1: dot]
+                    page_no = next_url[hyphen + 1 : dot]
                     # ONLY 1st 2 Pages!
                     # if int(page_no) >= 1:
                     #     break
@@ -257,10 +265,12 @@ async def page_loaded(p: Page):
                 else:
                     break
 
-            print(
+            logging.debug(
                 "end of loop!!",
             )
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            logging.debug(
+                "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            )
             break
         except PlaywrightTimeout:
             await asyncio.sleep(30)
@@ -271,16 +281,16 @@ async def page_loaded(p: Page):
 
     if retries == max_retries:
         desc = f"Maximum retries reached. page_loaded failed for url: {p.url}"
-        print(desc)
+        logging.debug(desc)
         insert_failure_data(desc=desc, url=p.url)
-    print("!!page_Loaded Finished!!")
+    logging.info("!!page_Loaded Finished!!")
 
 
 # Crawl website
 
 
 async def crawl_website(page: Page, url: str, links: List[str], depth: int):
-    print(f"Visiting: {url}, currently at depth {depth}")
+    logging.info("Visiting: %s, currently at depth %s", url, depth)
     await page.goto(url, timeout=60000)
     for link in links:
         links_to_visit = await page.locator(
@@ -294,11 +304,10 @@ async def crawl_website(page: Page, url: str, links: List[str], depth: int):
                 await page.goto(url + href)
                 await page_loaded(page)
             except PlaywrightTimeout:
-                print(
-                    f"crawl_website::Timeout error while getting attribute {locator}",
-                    file=sys.stderr,
+                logging.error(
+                    "crawl_website::Timeout error while getting attribute %s", locator
                 )
-                print("System is connected to internet => ", is_connected())
+                logging.debug("System is connected to internet => %s", is_connected())
                 continue
             except Exception as e:
                 handle_error("crawl_website", e, page.url)
@@ -313,11 +322,11 @@ async def initialize_chromium(playwright: Playwright):
     context = await browser.new_context()
 
     page = await context.new_page()
-    task_queue = asyncio.Queue()
+
     # input_file = json.load(open("input.json"))
 
     async def response_handler(response: Response):
-        await task_queue.put(await handle_response(response))
+        await asyncio.create_task(handle_response(response))
 
     context.on("response", response_handler)
-    return (page, context, browser, task_queue)
+    return (page, context, browser)

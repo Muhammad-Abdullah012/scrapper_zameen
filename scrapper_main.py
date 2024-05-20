@@ -12,6 +12,7 @@ from scrape import (
     is_connected,
     handle_error,
 )
+
 dotenv.load_dotenv()
 
 
@@ -21,9 +22,7 @@ async def run(playwright: Playwright):
         print("BASE_URL is missing in env file!")
         return
 
-    (page, context, browser, task_queue) = await initialize_chromium(
-        playwright=playwright
-    )
+    (page, context, browser) = await initialize_chromium(playwright=playwright)
     try:
         cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
         for city in cities:
@@ -32,16 +31,14 @@ async def run(playwright: Playwright):
             await page_loaded(page)
 
         print("System is connected to internet => ", is_connected())
-        tasks = [task_queue.get() for _ in range(task_queue.qsize())]
-        print(f"Waiting for {len(tasks)} tasks!!")
-        await asyncio.gather(*tasks)
+        await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
         print("Wait Finished!!")
     except Exception as e:
         handle_error("run", e, "run")
     finally:
-        if 'context' in locals():
+        if "context" in locals():
             await context.close()
-        if 'browser' in locals():
+        if "browser" in locals():
             await browser.close()
 
 
