@@ -31,45 +31,45 @@ threading.Thread(target=launch_chronjob).start()
 
 async def scrape_data_by_city(city: str):
     async with async_playwright() as playwright:
+        (page, context, browser) = await initialize_chromium(playwright=playwright)
         try:
-            (page, context, browser, task_queue) = await initialize_chromium(
-                playwright=playwright
-            )
             await page.goto(baseUrl, timeout=60000)
             await search_city(city=city, page=page)
             await page_loaded(page)
 
             print("System is connected to internet => ", is_connected())
-            tasks = [task_queue.get() for _ in range(task_queue.qsize())]
-            print(f"Waiting for {len(tasks)} tasks!!")
-            await asyncio.gather(*tasks)
+            await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
             print("Wait Finished!!")
 
-            await context.close()
-            await browser.close()
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
+        finally:
+            if "context" in locals():
+                await context.close()
+            if "browser" in locals():
+                await browser.close()
 
 
 async def scrape_data_by_url(url: str):
     async with async_playwright() as playwright:
+        (page, context, browser) = await initialize_chromium(playwright=playwright)
         try:
-            (page, context, browser, task_queue) = await initialize_chromium(
-                playwright=playwright
-            )
             await page.goto(url, timeout=60000)
             await page_loaded(page)
 
             print("System is connected to internet => ", is_connected())
-            tasks = [task_queue.get() for _ in range(task_queue.qsize())]
-            print(f"Waiting for {len(tasks)} tasks!!")
-            await asyncio.gather(*tasks)
+            await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
             print("Wait Finished!!")
 
             await context.close()
             await browser.close()
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
+        finally:
+            if "context" in locals():
+                await context.close()
+            if "browser" in locals():
+                await browser.close()
 
 
 @app.post("/scrap_by_city/{city}")
