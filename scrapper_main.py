@@ -25,10 +25,22 @@ async def run(playwright: Playwright):
     (page, context, browser) = await initialize_chromium(playwright=playwright)
     try:
         cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
+        properties = ["Homes", "Plots", "Commercial"]
+        purpose = ["Buy", "Rent"]
         for city in cities:
-            await page.goto(baseUrl, timeout=0)
-            await search_city(city=city, page=page)
-            await page_loaded(page)
+            for p in purpose:
+                for property in properties:
+                    await page.goto(baseUrl, timeout=0)
+                    await search_city(
+                        city=city, page=page, purpose=p, property=property
+                    )
+                    await page_loaded(page)
+                    print("waiting for 10 seconds")
+                    await asyncio.sleep(10)
+                    print("wait finished")
+
+        # await search_city(city=city, page=page)
+        # await page_loaded(page)
 
         print("System is connected to internet => ", is_connected())
         await asyncio.sleep(600)
