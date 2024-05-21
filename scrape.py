@@ -63,11 +63,24 @@ except Exception as err:
     handle_error("init_db", err, "")
 
 
-async def search_city(city: str, page: Page, timeout=60000):
+async def search_city(
+    city: str, page: Page, purpose: str, property: str, timeout=60000
+):
     max_retries = 4
     retries = 0
     while retries < max_retries:
         try:
+            search_form = page.get_by_label(
+                re.compile("^Mini search form$", re.IGNORECASE)
+            )
+            await search_form.get_by_text(purpose).click()
+            await search_form.get_by_text(
+                re.compile("^more options$", re.IGNORECASE)
+            ).click()
+            await search_form.get_by_text(
+                re.compile("^property type$", re.IGNORECASE)
+            ).click()
+            await search_form.get_by_role("listbox").get_by_text(property).click()
             locator = page.get_by_label("city filter")
             await locator.click(timeout=timeout)
             button = page.get_by_role("listbox").last
@@ -325,8 +338,8 @@ async def initialize_chromium(playwright: Playwright):
 
     # input_file = json.load(open("input.json"))
 
-    async def response_handler(response: Response):
-        await asyncio.create_task(handle_response(response))
+    def response_handler(response: Response):
+        asyncio.create_task(handle_response(response))
 
     context.on("response", response_handler)
     return (page, context, browser)

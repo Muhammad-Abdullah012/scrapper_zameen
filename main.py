@@ -38,7 +38,7 @@ async def scrape_data_by_city(city: str):
             await page_loaded(page)
 
             print("System is connected to internet => ", is_connected())
-            await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
+            await asyncio.sleep(600)
             print("Wait Finished!!")
 
         except Exception as e:
@@ -58,7 +58,7 @@ async def scrape_data_by_url(url: str):
             await page_loaded(page)
 
             print("System is connected to internet => ", is_connected())
-            await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
+            await asyncio.sleep(600)
             print("Wait Finished!!")
 
             await context.close()

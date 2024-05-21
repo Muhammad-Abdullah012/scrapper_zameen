@@ -1,11 +1,7 @@
 import re
 from datetime import datetime, timedelta
 
-mapping = {
-    "Crore": 7,
-    "Lakh": 5,
-    "Arab": 9,
-}
+mapping = {"Crore": 7, "Lakh": 5, "Arab": 9, "Thousand": 3}
 
 
 def format_price(price: str):
@@ -16,13 +12,13 @@ def format_price(price: str):
     print("parts ***==> ", parts)
     if len(parts) != 2:
         return ""
-    match = re.search(r'\d+(\.\d+)?', parts[0])
+    match = re.search(r"\d+(\.\d+)?", parts[0])
     if match is None:
         print("!!match is None!!")
         return ""
     numeric_part = match.group()
     numeric_value = float(numeric_part)
-    numeric_value *= 10**mapping[parts[1]]
+    numeric_value *= 10 ** mapping[parts[1]]
     return numeric_value
 
 
