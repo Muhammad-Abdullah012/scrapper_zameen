@@ -29,7 +29,7 @@ def threaded_job():
 
 print("!!!!!!!!Scheduling job!!!!!!")
 # schedule.every().minute.do(job)
-schedule.every().day.at("14:00", "UTC").do(threaded_job)
+schedule.every().day.at("04:00", "UTC").do(threaded_job)
 print("!!!!!!!!Scheduled!!!!!!")
 
 
