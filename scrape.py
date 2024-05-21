@@ -325,8 +325,8 @@ async def initialize_chromium(playwright: Playwright):
 
     # input_file = json.load(open("input.json"))
 
-    async def response_handler(response: Response):
-        await asyncio.create_task(handle_response(response))
+    def response_handler(response: Response):
+        asyncio.create_task(handle_response(response))
 
     context.on("response", response_handler)
     return (page, context, browser)

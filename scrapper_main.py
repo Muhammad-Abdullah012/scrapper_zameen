@@ -31,7 +31,7 @@ async def run(playwright: Playwright):
             await page_loaded(page)
 
         print("System is connected to internet => ", is_connected())
-        await asyncio.wait(asyncio.all_tasks(), return_when=asyncio.ALL_COMPLETED)
+        await asyncio.sleep(600)
         print("Wait Finished!!")
     except Exception as e:
         handle_error("run", e, "run")
