@@ -5,6 +5,7 @@ import sys
 from time import sleep
 import schedule
 from init_db import init_db
+from lock_file import create_lock, is_locked, remove_lock
 
 try:
     init_db()
@@ -14,22 +15,6 @@ except Exception as err:
 SCRIPT_PATH = os.getcwd() + "/scrapper_main.py"
 
 print("SCRIPT_PATH ==>> ", SCRIPT_PATH)
-
-LOCK_FILE = os.getcwd() + "/scrapper_job.lock"
-
-
-def create_lock():
-    with open(LOCK_FILE, "w") as lockfile:
-        lockfile.write(str(os.getpid()))
-
-
-def remove_lock():
-    if os.path.exists(LOCK_FILE):
-        os.remove(LOCK_FILE)
-
-
-def is_locked():
-    return os.path.exists(LOCK_FILE)
 
 
 def job():
