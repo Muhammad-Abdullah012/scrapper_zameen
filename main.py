@@ -1,6 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks
-import subprocess
-import threading
+from contextlib import asynccontextmanager
 import asyncio
 from os import environ, getcwd
 from sys import exit
@@ -8,8 +7,8 @@ from playwright.async_api import (
     async_playwright,
 )
 from scrape import search_city, page_loaded, initialize_chromium, is_connected
+from lock_file import create_lock, is_locked, remove_lock
 
-app = FastAPI()
 baseUrl = environ.get("BASE_URL")
 
 if baseUrl is None:
@@ -19,22 +18,35 @@ if baseUrl is None:
 CRONJOB_SCRIPT_PATH = getcwd() + "/cronjob.py"
 
 
-def launch_chronjob():
+async def launch_chronjob():
     try:
-        subprocess.run(["python3", CRONJOB_SCRIPT_PATH], check=True)
-    except subprocess.CalledProcessError as e:
+        await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
+    except Exception as e:
         print(f"Error running the script: {e}")
 
 
-threading.Thread(target=launch_chronjob).start()
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await launch_chronjob()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 async def scrape_data_by_city(city: str):
+    if is_locked():
+        print("Job is already running. Exiting this instance.")
+        return
+
+    create_lock()
     async with async_playwright() as playwright:
-        (page, context, browser) = await initialize_chromium(playwright=playwright)
+        context = None
+        browser = None
         try:
+            (page, context, browser) = await initialize_chromium(playwright=playwright)
             await page.goto(baseUrl, timeout=60000)
-            await search_city(city=city, page=page)
+            await search_city(city=city, page=page, purpose="Buy", property="Homes")
             await page_loaded(page)
 
             print("System is connected to internet => ", is_connected())
@@ -44,16 +56,24 @@ async def scrape_data_by_city(city: str):
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
         finally:
-            if "context" in locals():
+            if context:
                 await context.close()
-            if "browser" in locals():
+            if browser:
                 await browser.close()
+            remove_lock()
 
 
 async def scrape_data_by_url(url: str):
+    if is_locked():
+        print("Job is already running. Exiting this instance.")
+        return
+
+    create_lock()
     async with async_playwright() as playwright:
-        (page, context, browser) = await initialize_chromium(playwright=playwright)
+        context = None
+        browser = None
         try:
+            (page, context, browser) = await initialize_chromium(playwright=playwright)
             await page.goto(url, timeout=60000)
             await page_loaded(page)
 
@@ -66,10 +86,11 @@ async def scrape_data_by_url(url: str):
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
         finally:
-            if "context" in locals():
+            if context:
                 await context.close()
-            if "browser" in locals():
+            if browser:
                 await browser.close()
+            remove_lock()
 
 
 @app.post("/scrap_by_city/{city}")
