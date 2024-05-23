@@ -84,7 +84,6 @@ async def search_city(
             locator = page.get_by_label("city filter")
             await locator.click(timeout=timeout)
             button = page.get_by_role("listbox").last
-            logging.debug("button ==> %s", button)
             b = button.locator("button", has_text=city)
             await b.click(timeout=timeout)
 
@@ -128,11 +127,10 @@ async def handle_response(response: Response):
 
             for results in json_data["results"]:
                 try:
-                    hits = results["hits"]
-                    if len(hits) == 0:
+                    if len(results["hits"]) == 0:
                         logging.debug("hits is empty array!!!!!")
                         return
-                    insert_queries_data(hits)
+                    insert_queries_data(results["hits"])
                 except Exception as e:
                     handle_error(
                         "handle_response::inserting_queries", e, "handle_response"
@@ -214,13 +212,13 @@ async def get_page_html_data(
                     href = await a.locator("a").first.get_attribute(
                         "href", timeout=60000
                     )
-                    if href is None:
-                        logging.debug("No href found in link!")
-                        continue
-                    new_page = await context.new_page()
-                    await new_page.goto(base_url + href, timeout=60000)
-                    await process_page(new_page=new_page, h2=h2)
-                    await new_page.close()
+                    if href:
+                        new_page = await context.new_page()
+                        try:
+                            await new_page.goto(base_url + href, timeout=60000)
+                            await process_page(new_page=new_page, h2=h2)
+                        finally:
+                            await new_page.close()
             break
 
         except PlaywrightTimeout:
