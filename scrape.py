@@ -1,5 +1,6 @@
 import os
 import re
+import gc
 import sys
 import logging
 import asyncio
@@ -193,6 +194,8 @@ async def process_page(new_page: Page, h2: List[str]):
         insert_property_data(key_value_obj)
     except Exception as e:
         handle_error("process_page", e, new_page.url)
+    finally:
+        gc.collect()
 
 
 async def get_page_html_data(
@@ -232,6 +235,7 @@ async def get_page_html_data(
         logging.debug(desc)
         insert_failure_data(desc=desc, url=current_page.url)
     logging.info("!!get_page_html_data Finished!!")
+    gc.collect()
 
 
 async def page_loaded(p: Page):
@@ -295,6 +299,7 @@ async def page_loaded(p: Page):
         logging.debug(desc)
         insert_failure_data(desc=desc, url=p.url)
     logging.info("!!page_Loaded Finished!!")
+    gc.collect()
 
 
 # Crawl website
