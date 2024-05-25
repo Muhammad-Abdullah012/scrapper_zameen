@@ -104,6 +104,7 @@ async def search_city(
         logging.debug(desc)
         insert_failure_data(desc=desc, url=page.url)
     logging.info("!!!search_city finished!!!")
+    gc.collect()
 
 
 async def handle_response(response: Response):
@@ -140,6 +141,8 @@ async def handle_response(response: Response):
 
     except Exception as e:
         handle_error("handle_response", e, "handle_response")
+    finally:
+        gc.collect()
 
 
 async def fetch_all_text_contents(page: Page, label: str):
