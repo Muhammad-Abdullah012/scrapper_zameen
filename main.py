@@ -29,6 +29,7 @@ async def launch_chronjob():
 async def lifespan(_app: FastAPI):
     await launch_chronjob()
     yield
+    remove_lock()
 
 
 app = FastAPI(lifespan=lifespan)
