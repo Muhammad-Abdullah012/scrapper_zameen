@@ -20,7 +20,8 @@ CRONJOB_SCRIPT_PATH = getcwd() + "/cronjob.py"
 
 async def launch_chronjob():
     try:
-        await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
+        p = await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
+        await p.wait()
     except Exception as e:
         print(f"Error running the script: {e}")
 
@@ -82,8 +83,6 @@ async def scrape_data_by_url(url: str):
             await asyncio.sleep(600)
             print("Wait Finished!!")
 
-            await context.close()
-            await browser.close()
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
         finally:
