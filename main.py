@@ -20,8 +20,7 @@ CRONJOB_SCRIPT_PATH = getcwd() + "/cronjob.py"
 
 async def launch_chronjob():
     try:
-        p = await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
-        await p.wait()
+        await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
     except Exception as e:
         print(f"Error running the script: {e}")
 
