@@ -21,9 +21,10 @@ async def run(playwright: Playwright):
     if baseUrl is None:
         print("BASE_URL is missing in env file!")
         return
-
-    (page, context, browser) = await initialize_chromium(playwright=playwright)
+    context = None
+    browser = None
     try:
+        (page, context, browser) = await initialize_chromium(playwright=playwright)
         cities = ["islamabad", "rawalpindi", "lahore", "karachi"]
         properties = ["Homes", "Plots", "Commercial"]
         purpose = ["Buy", "Rent"]
@@ -48,9 +49,9 @@ async def run(playwright: Playwright):
     except Exception as e:
         handle_error("run", e, "run")
     finally:
-        if "context" in locals():
+        if context:
             await context.close()
-        if "browser" in locals():
+        if browser:
             await browser.close()
 
 
