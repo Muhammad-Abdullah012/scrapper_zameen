@@ -32,6 +32,7 @@ services:
           memory: '0.5g'
     container_name: scrapper_zameen_container
     tty: true
+    init: true
     ports:
       - "3000:3000"
     env_file:
