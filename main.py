@@ -1,7 +1,8 @@
+import logging
 from fastapi import FastAPI, BackgroundTasks
 from contextlib import asynccontextmanager
 import asyncio
-from os import environ, getcwd
+from os import environ, getcwd, setsid
 from sys import exit
 from playwright.async_api import (
     async_playwright,
@@ -20,9 +21,16 @@ CRONJOB_SCRIPT_PATH = getcwd() + "/cronjob.py"
 
 async def launch_chronjob():
     try:
-        await asyncio.create_subprocess_exec("python3", CRONJOB_SCRIPT_PATH)
+        process = await asyncio.create_subprocess_exec(
+            "python3", CRONJOB_SCRIPT_PATH, preexec_fn=setsid
+        )
+        asyncio.create_task(monitor_subprocess(process))
     except Exception as e:
-        print(f"Error running the script: {e}")
+        logging.error(f"Error running the script: {e}")
+
+
+async def monitor_subprocess(process):
+    await process.wait()
 
 
 @asynccontextmanager
@@ -50,9 +58,9 @@ async def scrape_data_by_city(city: str):
             await search_city(city=city, page=page, purpose="Buy", property="Homes")
             await page_loaded(page)
 
-            print("System is connected to internet => ", is_connected())
+            logging.info("System is connected to internet => %s", is_connected())
             await asyncio.sleep(600)
-            print("Wait Finished!!")
+            logging.info("Wait Finished!!")
 
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
@@ -78,9 +86,9 @@ async def scrape_data_by_url(url: str):
             await page.goto(url, timeout=60000)
             await page_loaded(page)
 
-            print("System is connected to internet => ", is_connected())
+            logging.info("System is connected to internet => %s", is_connected())
             await asyncio.sleep(600)
-            print("Wait Finished!!")
+            logging.info("Wait Finished!!")
 
         except Exception as e:
             return {"message": f"Something went wrong:: {str(e)}"}
