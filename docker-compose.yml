@@ -33,6 +33,7 @@ services:
     container_name: scrapper_zameen_container
     tty: true
     init: true
+    ipc: host
     ports:
       - "3000:3000"
     env_file:
